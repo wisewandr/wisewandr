@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#C4622D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="SoloWandr">
+<meta name="description" content="The app built exclusively for solo travelers. Plan safer, smarter, more connected solo adventures.">
+<title>SoloWandr — Travel Solo. Live Fully.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Recoleta:wght@400;500;700&family=Nunito:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --terra:#C4622D;--terra2:#D4794A;--terra3:#F2D0BF;--terra4:#FDF3EE;
+  --sand:#E8D5B8;--sand2:#F5ECD8;--sand3:#FAF6EE;--linen:#FBF8F2;
+  --bark:#2C1F14;--bark2:#4A3728;--bark3:#7A6050;--bark4:#B0A090;
+  --moss:#2A5028;--moss2:#3A7038;--moss3:#C0DCC0;--moss4:#EEF7EE;
+  --white:#FFFFFF;
+  --header-h:60px;
+  --nav-h:68px;
+  --transition:260ms cubic-bezier(0.4,0,0.2,1);
+}
+
+html,body{height:100%;overflow:hidden;touch-action:manipulation}
+
+body{
+  font-family:'Nunito',sans-serif;
+  background:var(--linen);
+  color:var(--bark);
+  display:flex;flex-direction:column;
+}
+
+/* ── Top header ── */
+.app-header{
+  height:var(--header-h);
+  background:var(--white);
+  border-bottom:1px solid var(--sand);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 18px;flex-shrink:0;z-index:50;
+  position:relative;
+}
+.brand{display:flex;align-items:center;gap:9px;cursor:pointer;user-select:none}
+.brand-mark{
+  width:34px;height:34px;border-radius:10px;
+  background:var(--terra);
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  box-shadow:0 2px 8px rgba(196,98,45,0.25);
+  transition:transform 0.15s;
+}
+.brand-mark:hover{transform:scale(1.05)}
+.brand-name{font-family:'Recoleta',serif;font-size:20px;font-weight:700;color:var(--bark);letter-spacing:-0.3px}
+.brand-name span{color:var(--terra)}
+
+.header-right{display:flex;align-items:center;gap:8px}
+.hdr-icon-btn{
+  width:36px;height:36px;border-radius:10px;border:none;background:none;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;
+  transition:background 0.14s;position:relative;
+}
+.hdr-icon-btn:hover{background:var(--sand3)}
+
+.pro-badge{
+  padding:5px 12px;border-radius:100px;border:none;
+  background:var(--terra);color:white;
+  font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;
+  cursor:pointer;transition:all 0.15s;letter-spacing:0.01em;
+}
+.pro-badge:hover{background:var(--terra2)}
+
+/* current screen label */
+.screen-label{
+  position:absolute;left:50%;transform:translateX(-50%);
+  font-family:'Recoleta',serif;font-size:15px;font-weight:700;
+  color:var(--bark);letter-spacing:-0.2px;
+  pointer-events:none;
+  transition:opacity var(--transition);
+  white-space:nowrap;
+}
+
+/* ── Content area ── */
+.content-area{
+  flex:1;overflow:hidden;position:relative;
+  background:var(--linen);
+}
+
+/* iframe screens */
+.screen{
+  position:absolute;inset:0;
+  border:none;width:100%;height:100%;
+  opacity:0;pointer-events:none;
+  transition:opacity var(--transition),transform var(--transition);
+  transform:translateY(12px);
+  background:var(--linen);
+}
+.screen.active{
+  opacity:1;pointer-events:auto;
+  transform:translateY(0);
+}
+.screen.slide-left{transform:translateX(-20px)}
+.screen.slide-right{transform:translateX(20px)}
+
+/* ── Bottom navigation ── */
+.bottom-nav{
+  height:var(--nav-h);
+  background:var(--white);
+  border-top:1px solid var(--sand);
+  display:flex;align-items:stretch;
+  padding:0 4px;flex-shrink:0;z-index:50;
+  box-shadow:0 -2px 16px rgba(44,31,20,0.06);
+}
+.nav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;cursor:pointer;border:none;background:none;
+  padding:6px 4px;border-radius:14px;transition:all 0.16s;
+  position:relative;-webkit-tap-highlight-color:transparent;
+}
+.nav-item:hover{background:var(--sand3)}
+.nav-item.active{background:var(--terra4)}
+
+.nav-icon{
+  font-size:22px;transition:transform 0.2s;
+  display:block;line-height:1;
+  filter:grayscale(0.5) opacity(0.5);
+}
+.nav-item.active .nav-icon{filter:none;transform:scale(1.08)}
+.nav-label{
+  font-size:10px;font-weight:600;color:var(--bark4);
+  transition:color 0.15s;white-space:nowrap;line-height:1;
+}
+.nav-item.active .nav-label{color:var(--terra);font-weight:800}
+
+/* active indicator dot */
+.nav-dot{
+  position:absolute;top:6px;
+  width:4px;height:4px;border-radius:50%;
+  background:var(--terra);
+  opacity:0;transform:scale(0);
+  transition:all 0.2s;
+}
+.nav-item.active .nav-dot{opacity:1;transform:scale(1)}
+
+/* ── More drawer (overflow nav) ── */
+.more-drawer{
+  position:fixed;bottom:calc(var(--nav-h) + 8px);left:50%;transform:translateX(-50%) translateY(10px);
+  background:var(--white);border:1.5px solid var(--sand);border-radius:20px;
+  padding:8px;width:calc(100% - 40px);max-width:400px;
+  box-shadow:0 8px 40px rgba(44,31,20,0.16);
+  z-index:100;
+  opacity:0;pointer-events:none;
+  transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+}
+.more-drawer.open{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+.md-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.md-item{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:6px;padding:14px 8px;border-radius:14px;cursor:pointer;
+  border:1.5px solid var(--sand);background:var(--linen);
+  transition:all 0.14s;text-align:center;
+}
+.md-item:hover{border-color:var(--terra);background:var(--terra4)}
+.md-item.active-route{border-color:var(--terra);background:var(--terra4)}
+.md-icon{font-size:24px}
+.md-label{font-size:11px;font-weight:700;color:var(--bark2)}
+.md-item.active-route .md-label{color:var(--terra)}
+
+.drawer-overlay{
+  position:fixed;inset:0;z-index:90;
+  opacity:0;pointer-events:none;transition:opacity 0.2s;
+}
+.drawer-overlay.open{opacity:1;pointer-events:auto}
+
+/* ── Splash/onboarding ── */
+.splash{
+  position:fixed;inset:0;z-index:200;
+  background:var(--linen);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:32px;text-align:center;
+  transition:opacity 0.4s ease,transform 0.4s ease;
+}
+.splash.hidden{opacity:0;transform:scale(1.02);pointer-events:none}
+.splash-mark{
+  width:80px;height:80px;border-radius:22px;
+  background:var(--terra);
+  display:flex;align-items:center;justify-content:center;font-size:40px;
+  margin-bottom:20px;
+  box-shadow:0 8px 32px rgba(196,98,45,0.3);
+  animation:markPop 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes markPop{from{transform:scale(0.7);opacity:0}to{transform:scale(1);opacity:1}}
+.splash-name{
+  font-family:'Recoleta',serif;font-size:40px;font-weight:700;
+  color:var(--bark);letter-spacing:-1px;margin-bottom:6px;
+  animation:fadeUp 0.5s ease 0.15s both;
+}
+.splash-name span{color:var(--terra)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.splash-tag{
+  font-size:15px;color:var(--bark3);margin-bottom:40px;line-height:1.65;
+  animation:fadeUp 0.5s ease 0.25s both;
+  max-width:300px;
+}
+.splash-btn{
+  padding:16px 48px;border-radius:100px;border:none;
+  background:var(--terra);color:white;
+  font-family:'Nunito',sans-serif;font-size:17px;font-weight:800;
+  cursor:pointer;transition:all 0.18s;
+  box-shadow:0 6px 24px rgba(196,98,45,0.3);
+  animation:fadeUp 0.5s ease 0.35s both;
+  letter-spacing:0.01em;
+}
+.splash-btn:hover{background:var(--terra2);transform:translateY(-2px)}
+.splash-features{
+  display:flex;gap:10px;flex-wrap:wrap;justify-content:center;
+  margin-bottom:40px;
+  animation:fadeUp 0.5s ease 0.3s both;
+}
+.sf-pill{
+  font-size:12px;font-weight:700;padding:6px 14px;border-radius:100px;
+  background:var(--white);border:1.5px solid var(--sand);color:var(--bark2);
+}
+.splash-terms{font-size:11px;color:var(--bark4);margin-top:16px;animation:fadeUp 0.4s ease 0.4s both}
+
+/* ── Pro modal ── */
+.modal-overlay{
+  position:fixed;inset:0;z-index:150;
+  background:rgba(44,31,20,0.5);
+  display:flex;align-items:flex-end;
+  opacity:0;pointer-events:none;transition:opacity 0.2s;
+}
+.modal-overlay.open{opacity:1;pointer-events:auto}
+.pro-modal{
+  background:var(--white);border-radius:24px 24px 0 0;
+  width:100%;padding:0 24px 48px;
+  transform:translateY(40px);transition:transform 0.3s cubic-bezier(0.34,1.2,0.64,1);
+  max-height:90vh;overflow-y:auto;
+}
+.modal-overlay.open .pro-modal{transform:translateY(0)}
+.modal-handle{width:40px;height:4px;border-radius:2px;background:var(--sand);margin:14px auto 22px}
+
+.pro-hero{
+  background:var(--terra);border-radius:18px;padding:22px 24px;margin-bottom:20px;
+  text-align:center;color:white;
+}
+.ph-icon{font-size:40px;margin-bottom:10px;display:block}
+.ph-title{font-family:'Recoleta',serif;font-size:24px;font-weight:700;margin-bottom:6px}
+.ph-price{font-family:'Recoleta',serif;font-size:36px;font-weight:700}
+.ph-price span{font-size:16px;opacity:0.7}
+.ph-desc{font-size:13px;opacity:0.8;margin-top:6px;line-height:1.6}
+
+.pro-features{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.pf-item{
+  display:flex;gap:12px;align-items:flex-start;
+  padding:12px 14px;background:var(--linen);border-radius:12px;
+  border:1.5px solid var(--sand);
+}
+.pfi-icon{font-size:20px;flex-shrink:0}
+.pfi-text{}
+.pfit-title{font-size:14px;font-weight:800;color:var(--bark);margin-bottom:2px}
+.pfit-desc{font-size:12px;color:var(--bark3);line-height:1.55}
+.pro-cta{
+  width:100%;padding:15px;border-radius:14px;border:none;
+  background:var(--terra);color:white;
+  font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;
+  cursor:pointer;transition:all 0.16s;margin-bottom:10px;
+}
+.pro-cta:hover{background:var(--terra2)}
+.pro-skip{
+  width:100%;padding:12px;border-radius:12px;border:1.5px solid var(--sand);background:none;
+  font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:var(--bark3);cursor:pointer;
+}
+
+/* ── Notification dot ── */
+.notif-dot{
+  position:absolute;top:7px;right:7px;
+  width:8px;height:8px;border-radius:50%;
+  background:var(--terra);border:2px solid var(--white);
+}
+
+/* ── Loading skeleton for iframes ── */
+.screen-loader{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--linen);
+  transition:opacity 0.3s;
+  pointer-events:none;
+}
+.screen-loader.hidden{opacity:0}
+.sl-spinner{
+  width:44px;height:44px;border-radius:50%;
+  border:3px solid var(--sand);border-top-color:var(--terra);
+  animation:spin 0.9s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- Splash screen -->
+<div class="splash" id="splash">
+  <div class="splash-mark">🧳</div>
+  <div class="splash-name">Solo<span>Wandr</span></div>
+  <div class="splash-tag">Travel solo. Live fully.<br>Never alone.</div>
+  <div class="splash-features">
+    <span class="sf-pill">🌍 Destination Scores</span>
+    <span class="sf-pill">🛡 Safety Check-in</span>
+    <span class="sf-pill">⭐ Confidence Score</span>
+    <span class="sf-pill">🤝 Travel Buddies</span>
+    <span class="sf-pill">💻 Nomad Hub</span>
+    <span class="sf-pill">📖 AI Journal</span>
+    <span class="sf-pill">🍽 Solo Dining</span>
+    <span class="sf-pill">💸 Supplement Calc</span>
+    <span class="sf-pill">🏠 Hostel Finder</span>
+  </div>
+  <button class="splash-btn" onclick="enterApp()">Start Exploring →</button>
+  <div class="splash-terms">Free to use · No account needed to get started · solowandr.app</div>
+</div>
+
+<!-- App header -->
+<header class="app-header" id="appHeader" style="display:none">
+  <div class="brand" onclick="navigateTo('home')">
+    <div class="brand-mark">🧳</div>
+    <div class="brand-name">Solo<span>Wandr</span></div>
+  </div>
+  <div class="screen-label" id="screenLabel"></div>
+  <div class="header-right">
+    <button class="hdr-icon-btn" onclick="openNotifications()" title="Notifications">
+      🔔
+      <div class="notif-dot" id="notifDot"></div>
+    </button>
+    <button class="pro-badge" onclick="openProModal()">✦ Go Pro</button>
+  </div>
+</header>
+
+<!-- Content area -->
+<div class="content-area" id="contentArea" style="display:none">
+  <!-- Screens injected dynamically -->
+</div>
+
+<!-- Bottom navigation -->
+<nav class="bottom-nav" id="bottomNav" style="display:none">
+  <button class="nav-item active" id="nav-home" onclick="navigateTo('home')">
+    <div class="nav-dot"></div>
+    <span class="nav-icon">🏠</span>
+    <span class="nav-label">Home</span>
+  </button>
+  <button class="nav-item" id="nav-explore" onclick="navigateTo('destination-finder')">
+    <div class="nav-dot"></div>
+    <span class="nav-icon">🌍</span>
+    <span class="nav-label">Explore</span>
+  </button>
+  <button class="nav-item" id="nav-safety" onclick="navigateTo('safety-checkin')">
+    <div class="nav-dot"></div>
+    <span class="nav-icon">🛡</span>
+    <span class="nav-label">Safety</span>
+  </button>
+  <button class="nav-item" id="nav-community" onclick="navigateTo('buddy-board')">
+    <div class="nav-dot"></div>
+    <span class="nav-icon">🤝</span>
+    <span class="nav-label">Buddies</span>
+  </button>
+  <button class="nav-item" id="nav-more" onclick="toggleMoreDrawer()">
+    <div class="nav-dot"></div>
+    <span class="nav-icon">☰</span>
+    <span class="nav-label">More</span>
+  </button>
+</nav>
+
+<!-- More drawer overlay -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeMoreDrawer()"></div>
+
+<!-- More drawer -->
+<div class="more-drawer" id="moreDrawer">
+  <div class="md-grid">
+    <div class="md-item" id="md-confidence" onclick="navigateTo('confidence-score');closeMoreDrawer()">
+      <span class="md-icon">⭐</span>
+      <span class="md-label">Confidence Score</span>
+    </div>
+    <div class="md-item" id="md-nomad" onclick="navigateTo('nomad-hub');closeMoreDrawer()">
+      <span class="md-icon">💻</span>
+      <span class="md-label">Nomad Hub</span>
+    </div>
+    <div class="md-item" id="md-journal" onclick="navigateTo('ai-journal');closeMoreDrawer()">
+      <span class="md-icon">📖</span>
+      <span class="md-label">Journal</span>
+    </div>
+    <div class="md-item" id="md-dining" onclick="navigateTo('dining-guide');closeMoreDrawer()">
+      <span class="md-icon">🍽</span>
+      <span class="md-label">Solo Dining</span>
+    </div>
+    <div class="md-item" id="md-supplement" onclick="navigateTo('supplement-calc');closeMoreDrawer()">
+      <span class="md-icon">💸</span>
+      <span class="md-label">Supplement Calc</span>
+    </div>
+    <div class="md-item" id="md-hostels" onclick="navigateTo('hostel-finder');closeMoreDrawer()">
+      <span class="md-icon">🏠</span>
+      <span class="md-label">Hostel Finder</span>
+    </div>
+  </div>
+</div>
+
+<!-- Pro modal -->
+<div class="modal-overlay" id="proModal" onclick="closeProModal(event)">
+  <div class="pro-modal">
+    <div class="modal-handle"></div>
+    <div class="pro-hero">
+      <span class="ph-icon">✦</span>
+      <div class="ph-title">SoloWandr Pro</div>
+      <div class="ph-price">$9.99<span>/month</span></div>
+      <div class="ph-desc">Unlimited AI features, saved trips, and the full solo travel toolkit</div>
+    </div>
+    <div class="pro-features">
+      <div class="pf-item">
+        <span class="pfi-icon">🤖</span>
+        <div class="pfi-text">
+          <div class="pfit-title">Unlimited Claude AI</div>
+          <div class="pfit-desc">All 10 AI features with no daily limit. Free tier is capped at 10 requests/day.</div>
+        </div>
+      </div>
+      <div class="pf-item">
+        <span class="pfi-icon">📖</span>
+        <div class="pfi-text">
+          <div class="pfit-title">AI Trip Journal — saved forever</div>
+          <div class="pfit-desc">Your travel stories saved to your account, exportable as PDF, shareable with a link.</div>
+        </div>
+      </div>
+      <div class="pf-item">
+        <span class="pfi-icon">🛡</span>
+        <div class="pfi-text">
+          <div class="pfit-title">Safety Check-in — unlimited contacts</div>
+          <div class="pfit-desc">Free tier: 2 contacts. Pro: unlimited contacts, SMS alerts, trip timeline sharing.</div>
+        </div>
+      </div>
+      <div class="pf-item">
+        <span class="pfi-icon">🤝</span>
+        <div class="pfi-text">
+          <div class="pfit-title">Verified Travel Buddy profile</div>
+          <div class="pfit-desc">Verified badge on the Buddy Board so other travelers know you're real.</div>
+        </div>
+      </div>
+      <div class="pf-item">
+        <span class="pfi-icon">💾</span>
+        <div class="pfi-text">
+          <div class="pfit-title">Save destinations, hostels & restaurants</div>
+          <div class="pfit-desc">Build your personal travel library across all features.</div>
+        </div>
+      </div>
+    </div>
+    <button class="pro-cta" onclick="alert('Payment integration coming soon! Join the waitlist at solowandr.app')">✦ Start Free 7-Day Trial</button>
+    <button class="pro-skip" onclick="closeProModal()">Maybe later — continue free</button>
+  </div>
+</div>
+
+<script>
+// ── Screen registry ──
+const SCREENS = {
+  'home':              {file:'solowandr-home.html',        label:'SoloWandr',          nav:'nav-home'},
+  'destination-finder':{file:'solowandr-destination-finder.html', label:'Destination Finder', nav:'nav-explore'},
+  'safety-checkin':    {file:'solowandr-safety-checkin.html',  label:'Safety Check-in',    nav:'nav-safety'},
+  'buddy-board':       {file:'solowandr-buddy-board.html',     label:'Travel Buddy Board', nav:'nav-community'},
+  'confidence-score':  {file:'solowandr-confidence-score.html',label:'Confidence Score',   nav:'nav-more',  drawer:'md-confidence'},
+  'nomad-hub':         {file:'solowandr-nomad-hub.html',       label:'Nomad Hub',          nav:'nav-more',  drawer:'md-nomad'},
+  'ai-journal':        {file:'solowandr-ai-journal.html',      label:'Trip Journal',       nav:'nav-more',  drawer:'md-journal'},
+  'dining-guide':      {file:'solowandr-dining-guide.html',    label:'Solo Dining',        nav:'nav-more',  drawer:'md-dining'},
+  'supplement-calc':   {file:'solowandr-supplement-calc.html', label:'Supplement Calc',    nav:'nav-more',  drawer:'md-supplement'},
+  'hostel-finder':     {file:'solowandr-hostel-finder.html',   label:'Hostel Finder',      nav:'nav-more',  drawer:'md-hostels'},
+};
+
+let currentRoute = 'home';
+let prevRoute    = null;
+const loadedScreens = new Set();
+
+// ── Splash ──
+function enterApp() {
+  document.getElementById('splash').classList.add('hidden');
+  document.getElementById('appHeader').style.display  = 'flex';
+  document.getElementById('contentArea').style.display = 'block';
+  document.getElementById('bottomNav').style.display   = 'flex';
+  navigateTo('home');
+  // After 4s on home, show pro nudge once
+  setTimeout(() => {
+    if (currentRoute === 'home' && !sessionStorage.getItem('proNudgeDone')) {
+      sessionStorage.setItem('proNudgeDone','1');
+    }
+  }, 4000);
+}
+
+// ── Navigation ──
+function navigateTo(route) {
+  if (route === currentRoute) return;
+  if (!SCREENS[route]) return;
+
+  const config     = SCREENS[route];
+  const prevConfig = SCREENS[currentRoute];
+  prevRoute = currentRoute;
+
+  // Hide current screen
+  const prevEl = document.getElementById('screen-' + prevRoute);
+  if (prevEl) {
+    prevEl.classList.remove('active');
+    const wasLeft = Object.keys(SCREENS).indexOf(route) < Object.keys(SCREENS).indexOf(prevRoute);
+    prevEl.classList.add(wasLeft ? 'slide-right' : 'slide-left');
+    setTimeout(() => { prevEl.classList.remove('slide-left','slide-right'); }, 300);
+  }
+
+  currentRoute = route;
+
+  // Update nav bar
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  const navBtn = document.getElementById(config.nav);
+  if (navBtn) navBtn.classList.add('active');
+
+  // Update more drawer items
+  document.querySelectorAll('.md-item').forEach(i => i.classList.remove('active-route'));
+  if (config.drawer) {
+    const di = document.getElementById(config.drawer);
+    if (di) di.classList.add('active-route');
+  }
+
+  // Update header label
+  document.getElementById('screenLabel').textContent = config.label !== 'SoloWandr' ? config.label : '';
+
+  // Create screen if needed
+  if (!loadedScreens.has(route)) {
+    createScreen(route, config);
+  } else {
+    showScreen(route);
+  }
+}
+
+function createScreen(route, config) {
+  const area = document.getElementById('contentArea');
+
+  // Loader placeholder
+  const loaderEl = document.createElement('div');
+  loaderEl.className = 'screen-loader';
+  loaderEl.id = 'loader-' + route;
+  loaderEl.innerHTML = '<div class="sl-spinner"></div>';
+  area.appendChild(loaderEl);
+
+  // In production this would be an iframe loading the feature file.
+  // In this shell demo we directly load the content via fetch+srcdoc for same-origin,
+  // or use an iframe with src pointing to the feature file in the same folder.
+  const iframe = document.createElement('iframe');
+  iframe.className = 'screen';
+  iframe.id = 'screen-' + route;
+  iframe.setAttribute('loading', 'lazy');
+  iframe.setAttribute('title', config.label);
+  iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-popups');
+
+  // Point to the feature file (same directory in production)
+  iframe.src = config.file;
+
+  iframe.addEventListener('load', () => {
+    const loader = document.getElementById('loader-' + route);
+    if (loader) loader.classList.add('hidden');
+    setTimeout(() => { if(loader) loader.remove(); }, 350);
+    showScreen(route);
+  });
+
+  area.appendChild(iframe);
+  loadedScreens.add(route);
+}
+
+function showScreen(route) {
+  const el = document.getElementById('screen-' + route);
+  if (el) {
+    el.classList.remove('slide-left','slide-right');
+    el.classList.add('active');
+  }
+}
+
+// ── More drawer ──
+function toggleMoreDrawer() {
+  const drawer  = document.getElementById('moreDrawer');
+  const overlay = document.getElementById('drawerOverlay');
+  const isOpen  = drawer.classList.contains('open');
+  drawer.classList.toggle('open', !isOpen);
+  overlay.classList.toggle('open', !isOpen);
+  document.getElementById('nav-more').classList.toggle('active', !isOpen);
+}
+function closeMoreDrawer() {
+  document.getElementById('moreDrawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+  // Restore correct active state
+  const config = SCREENS[currentRoute];
+  if (config && config.nav !== 'nav-more') {
+    document.getElementById('nav-more').classList.remove('active');
+  }
+}
+
+// ── Pro modal ──
+function openProModal() {
+  document.getElementById('proModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeProModal(e) {
+  if (e && e.target !== document.getElementById('proModal')) return;
+  document.getElementById('proModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ── Notifications ──
+function openNotifications() {
+  document.getElementById('notifDot').style.display = 'none';
+  alert('🔔 Notifications\n\n• 3 solo travelers are heading to Japan in July — check the Buddy Board\n• Your Safety Check-in is active\n• New Confidence Score update: Bali rated 8.4/10 for first-timers\n\nIn the full app notifications link directly to the relevant feature.');
+}
+
+// ── Keyboard navigation ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeMoreDrawer(); closeProModal(); }
+});
+
+// ── Deep linking ── handle ?screen=route in URL
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const deep = params.get('screen');
+  if (deep && SCREENS[deep]) {
+    enterApp();
+    navigateTo(deep);
+  }
+})();
+
+// ── Back button support ──
+window.addEventListener('popstate', e => {
+  const route = e.state?.route;
+  if (route && SCREENS[route] && route !== currentRoute) {
+    navigateTo(route);
+  }
+});
+
+// Push initial state
+history.replaceState({route:'home'}, '', window.location.href);
+</script>
+</body>
+</html>
