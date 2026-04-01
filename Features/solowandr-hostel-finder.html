@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SoloWandr — Hostel Finder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Recoleta:wght@400;500;700&family=Nunito:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --terra:#C4622D;--terra2:#D4794A;--terra3:#F2D0BF;--terra4:#FDF3EE;
+  --sand:#E8D5B8;--sand2:#F5ECD8;--sand3:#FAF6EE;--linen:#FBF8F2;
+  --bark:#2C1F14;--bark2:#4A3728;--bark3:#7A6050;--bark4:#B0A090;
+  --moss:#2A5028;--moss2:#3A7038;--moss3:#C0DCC0;--moss4:#EEF7EE;
+  --sky:#1A4870;--sky2:#2A6898;--sky3:#C0D8F0;--sky4:#EEF4FC;
+  --gold:#8A6018;--gold2:#B88828;--gold3:#F8E4A8;--gold4:#FFFAEE;
+  --rose:#8A1840;--rose2:#B83060;--rose3:#F4C0D0;--rose4:#FDF0F5;
+  --plum:#4A1870;--plum2:#6A28A0;--plum3:#E0C8F8;--plum4:#F8F0FF;
+  --party:#8A3018;--party2:#C05028;--party3:#F8C8B0;--party4:#FEF5F0;
+  --quiet:#183858;--quiet2:#285890;--quiet3:#C0D4F0;--quiet4:#EEF4FF;
+  --white:#FFFFFF;--r:14px;--nav-h:64px;
+}
+
+body{font-family:'Nunito',sans-serif;background:var(--linen);color:var(--bark);min-height:100vh;overflow-x:hidden}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse 55% 40% at 20% 10%,rgba(196,98,45,0.05) 0%,transparent 55%),
+             radial-gradient(ellipse 45% 50% at 85% 90%,rgba(74,24,112,0.04) 0%,transparent 55%);
+  pointer-events:none;z-index:0;
+}
+
+.app{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:0 20px calc(var(--nav-h)+28px)}
+
+/* ── Header ── */
+header{padding:24px 0 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--sand);margin-bottom:24px}
+.brand{display:flex;align-items:center;gap:8px}
+.brand-mark{width:30px;height:30px;border-radius:8px;background:var(--terra);display:flex;align-items:center;justify-content:center;font-size:15px}
+.brand-name{font-family:'Recoleta',serif;font-size:17px;font-weight:700;color:var(--bark)}
+.brand-name span{color:var(--terra)}
+.page-tag{background:var(--plum4);border:1px solid var(--plum3);color:var(--plum2);font-size:11px;font-weight:700;padding:4px 12px;border-radius:100px}
+
+/* ── Search card ── */
+.search-card{
+  background:var(--white);border:1.5px solid var(--sand);border-radius:22px;
+  padding:26px 28px;margin-bottom:22px;
+  box-shadow:0 2px 14px rgba(44,31,20,0.05);
+}
+.sc-title{font-family:'Recoleta',serif;font-size:24px;font-weight:700;color:var(--bark);margin-bottom:5px;letter-spacing:-0.5px}
+.sc-title em{color:var(--terra);font-style:italic}
+.sc-sub{font-size:14px;color:var(--bark3);margin-bottom:20px;line-height:1.6}
+
+.vibe-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px}
+.vb{
+  padding:8px 16px;border-radius:100px;border:1.5px solid var(--sand);background:none;
+  font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;color:var(--bark2);
+  cursor:pointer;transition:all 0.14s;user-select:none;
+  display:flex;align-items:center;gap:6px;
+}
+.vb:hover{border-color:var(--terra);color:var(--terra)}
+.vb.active{background:var(--terra);border-color:var(--terra);color:white}
+
+/* party–quiet slider */
+.vibe-slider-wrap{
+  background:var(--linen);border-radius:16px;padding:18px 20px;margin-bottom:18px;
+}
+.vs-title{font-size:12px;font-weight:700;color:var(--bark3);text-transform:uppercase;letter-spacing:0.09em;margin-bottom:12px}
+.vs-labels{display:flex;justify-content:space-between;margin-bottom:8px}
+.vs-label{font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}
+.vs-label.party{color:var(--party2)}
+.vs-label.quiet{color:var(--quiet2)}
+.vibe-slider{
+  -webkit-appearance:none;appearance:none;
+  width:100%;height:10px;border-radius:5px;outline:none;cursor:pointer;
+  background:linear-gradient(to right,var(--party3) 0%,var(--sand3) 50%,var(--quiet3) 100%);
+}
+.vibe-slider::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:24px;height:24px;border-radius:50%;
+  background:var(--terra);border:3px solid white;
+  box-shadow:0 2px 8px rgba(196,98,45,0.3);cursor:pointer;
+}
+.vs-current{text-align:center;font-size:13px;font-weight:700;color:var(--bark2);margin-top:8px}
+
+.search-row{display:grid;grid-template-columns:1fr 140px 140px 140px auto;gap:10px;align-items:end}
+@media(max-width:700px){.search-row{grid-template-columns:1fr 1fr}}
+@media(max-width:420px){.search-row{grid-template-columns:1fr}}
+
+.field{display:flex;flex-direction:column;gap:5px}
+label{font-size:10px;font-weight:700;color:var(--bark3);text-transform:uppercase;letter-spacing:0.09em}
+input,select{
+  font-family:'Nunito',sans-serif;font-size:13px;color:var(--bark);
+  background:var(--linen);border:1.5px solid var(--sand);
+  border-radius:10px;padding:9px 12px;width:100%;outline:none;
+  transition:border-color 0.2s;appearance:none;
+}
+input::placeholder{color:var(--bark4)}
+input:focus,select:focus{border-color:var(--terra);box-shadow:0 0 0 2px rgba(196,98,45,0.1);background:var(--white)}
+
+.find-btn{
+  padding:9px 22px;border-radius:10px;border:none;
+  background:var(--terra);color:white;
+  font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;
+  cursor:pointer;white-space:nowrap;transition:all 0.15s;
+}
+.find-btn:hover{background:var(--terra2);transform:translateY(-1px)}
+.find-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+
+.err-bar{font-size:13px;color:var(--terra);background:var(--terra4);border:1px solid var(--terra3);border-radius:9px;padding:10px 14px;margin-top:10px;display:none}
+.err-bar.show{display:block}
+
+/* ── Loading ── */
+.loading-wrap{display:none;text-align:center;padding:56px 20px}
+.loading-wrap.show{display:block}
+.backpack-bounce{font-size:42px;display:block;margin:0 auto 18px;animation:bbounce 1.2s ease-in-out infinite}
+@keyframes bbounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.ld-title{font-family:'Recoleta',serif;font-size:19px;font-style:italic;color:var(--bark2)}
+.ld-sub{font-size:13px;color:var(--bark4);margin-top:5px}
+
+/* ── Empty ── */
+.empty-state{text-align:center;padding:60px 20px}
+.es-icon{font-size:52px;margin-bottom:14px;opacity:0.18}
+.es-title{font-family:'Recoleta',serif;font-size:21px;font-style:italic;color:var(--bark2);margin-bottom:8px}
+.es-sub{font-size:13px;color:var(--bark4);max-width:360px;margin:0 auto;line-height:1.65}
+
+/* ── RESULTS ── */
+#results{display:none}
+#results.show{display:block;animation:fadeUp 0.35s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── City hostel overview ── */
+.city-overview{
+  background:var(--bark);border-radius:22px;padding:24px 28px;margin-bottom:20px;
+  position:relative;overflow:hidden;
+  display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;
+}
+.city-overview::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:rgba(196,98,45,0.1);pointer-events:none}
+.co-inner{flex:1;position:relative;z-index:1}
+.co-eyebrow{font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.1em;font-weight:700;margin-bottom:4px}
+.co-city{font-family:'Recoleta',serif;font-size:26px;font-weight:700;color:white;margin-bottom:6px}
+.co-verdict{font-size:13px;font-weight:700;padding:5px 14px;border-radius:100px;display:inline-block;margin-bottom:10px}
+.cv-great{background:rgba(60,200,100,0.2);color:#80F0A0}
+.cv-good{background:rgba(255,200,60,0.2);color:#FFE080}
+.cv-mixed{background:rgba(255,140,60,0.2);color:#FFC080}
+.co-summary{font-size:14px;color:rgba(255,255,255,0.72);line-height:1.7;max-width:500px}
+.co-stats{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;position:relative;z-index:1}
+.cos-item{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:9px 14px}
+.cosi-val{font-family:'Recoleta',serif;font-size:18px;font-weight:700;color:white}
+.cosi-lbl{font-size:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.07em;margin-top:1px}
+
+/* ── Party/Quiet spectrum bar ── */
+.spectrum-bar{
+  background:var(--white);border:1.5px solid var(--sand);border-radius:16px;
+  padding:18px 22px;margin-bottom:20px;
+}
+.sb-title{font-size:12px;font-weight:700;color:var(--bark3);text-transform:uppercase;letter-spacing:0.09em;margin-bottom:10px;display:flex;justify-content:space-between}
+.sb-track{position:relative;height:16px;background:linear-gradient(to right,var(--party3),var(--sand3),var(--quiet3));border-radius:8px;margin-bottom:8px}
+.sb-markers{display:flex;gap:0;position:absolute;inset:0}
+.sb-marker{
+  flex:1;height:100%;border-right:1px solid rgba(255,255,255,0.4);
+  position:relative;cursor:default;
+}
+.sb-marker:last-child{border-right:none}
+.sb-hostel-dot{
+  position:absolute;top:50%;transform:translate(-50%,-50%);
+  width:14px;height:14px;border-radius:50%;border:2px solid white;
+  box-shadow:0 1px 5px rgba(0,0,0,0.2);
+  cursor:pointer;transition:transform 0.15s;z-index:2;
+}
+.sb-hostel-dot:hover{transform:translate(-50%,-50%) scale(1.3)}
+.sb-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--bark4);font-weight:700}
+
+/* ── Hostel cards ── */
+.hostels-grid{display:flex;flex-direction:column;gap:16px;margin-bottom:24px}
+
+.hostel-card{
+  background:var(--white);border:1.5px solid var(--sand);border-radius:18px;
+  overflow:hidden;transition:all 0.2s;
+  animation:fadeUp 0.4s ease both;
+}
+.hostel-card:hover{box-shadow:0 10px 30px rgba(44,31,20,0.09);border-color:var(--terra3)}
+
+/* top colour strip = vibe */
+.hc-strip{height:5px}
+.strip-party{background:linear-gradient(to right,var(--party2),var(--terra2))}
+.strip-social{background:linear-gradient(to right,var(--terra2),var(--gold2))}
+.strip-balanced{background:linear-gradient(to right,var(--gold2),var(--moss2))}
+.strip-quiet{background:linear-gradient(to right,var(--moss2),var(--quiet2))}
+
+.hc-header{padding:16px 20px 12px;display:flex;gap:14px;align-items:flex-start}
+.hc-avatar{
+  width:52px;height:52px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;
+}
+.hc-info{flex:1}
+.hc-name{font-size:16px;font-weight:800;color:var(--bark);margin-bottom:2px}
+.hc-meta{font-size:12px;color:var(--bark4);display:flex;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.hc-badges{display:flex;gap:5px;flex-wrap:wrap}
+.hcb{font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px}
+.hcb-party{background:var(--party4);color:var(--party2);border:1px solid var(--party3)}
+.hcb-social{background:var(--terra4);color:var(--terra);border:1px solid var(--terra3)}
+.hcb-balanced{background:var(--gold4);color:var(--gold2);border:1px solid var(--gold3)}
+.hcb-quiet{background:var(--quiet4);color:var(--quiet2);border:1px solid var(--quiet3)}
+.hcb-female{background:var(--rose4);color:var(--rose2);border:1px solid var(--rose3)}
+.hcb-nomad{background:var(--sky4);color:var(--sky2);border:1px solid var(--sky3)}
+.hcb-verified{background:var(--moss4);color:var(--moss2);border:1px solid var(--moss3)}
+
+.hc-right{text-align:right;flex-shrink:0}
+.hcr-price{font-family:'Recoleta',serif;font-size:22px;font-weight:700;color:var(--terra)}
+.hcr-night{font-size:11px;color:var(--bark4);margin-bottom:4px}
+.hcr-rating{font-size:13px;font-weight:700;color:var(--gold2)}
+.hcr-solo{font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;background:var(--moss4);color:var(--moss2);margin-top:5px;display:inline-block}
+
+.hc-body{padding:0 20px 14px}
+
+/* vibe spectrum indicator */
+.vibe-indicator{
+  display:flex;align-items:center;gap:10px;margin-bottom:12px;
+}
+.vi-label-l{font-size:11px;font-weight:700;color:var(--party2)}
+.vi-label-r{font-size:11px;font-weight:700;color:var(--quiet2)}
+.vi-track{flex:1;height:8px;background:linear-gradient(to right,var(--party3),var(--sand3),var(--quiet3));border-radius:4px;position:relative}
+.vi-thumb{
+  position:absolute;top:50%;transform:translate(-50%,-50%);
+  width:16px;height:16px;border-radius:50%;border:2px solid white;
+  box-shadow:0 1px 4px rgba(0,0,0,0.15);transition:left 0.5s ease;
+}
+
+.hc-desc{font-size:13px;color:var(--bark2);line-height:1.7;margin-bottom:10px}
+
+/* score mini-grid */
+.hc-scores{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+@media(max-width:480px){.hc-scores{grid-template-columns:repeat(2,1fr)}}
+.hcs-cell{background:var(--linen);border-radius:10px;padding:9px;text-align:center}
+.hcs-icon{font-size:16px;margin-bottom:3px;display:block}
+.hcs-label{font-size:10px;color:var(--bark4);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:2px}
+.hcs-val{font-family:'Recoleta',serif;font-size:15px;font-weight:700;color:var(--bark)}
+
+/* room types */
+.room-types{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.rt-chip{font-size:12px;font-weight:700;padding:4px 12px;border-radius:100px;background:var(--sand3);color:var(--bark2);border:1px solid var(--sand);display:flex;align-items:center;gap:5px}
+.rt-female{background:var(--rose4);color:var(--rose2);border-color:var(--rose3)}
+.rt-private{background:var(--sky4);color:var(--sky2);border-color:var(--sky3)}
+
+/* highlights */
+.hc-highlights{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.hch-item{font-size:13px;color:var(--bark2);display:flex;gap:7px;align-items:flex-start}
+.hch-dot{color:var(--terra);font-weight:800;flex-shrink:0;margin-top:1px}
+
+.hc-footer{
+  padding:10px 20px 14px;border-top:1px solid var(--sand2);
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+}
+.hcf-book{
+  flex:1;padding:10px;border-radius:10px;border:none;
+  background:var(--terra);color:white;
+  font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;
+  cursor:pointer;transition:all 0.14s;
+}
+.hcf-book:hover{background:var(--terra2)}
+.hcf-save{
+  width:40px;height:40px;border-radius:10px;border:1.5px solid var(--sand);background:none;
+  font-size:18px;cursor:pointer;transition:all 0.14s;display:flex;align-items:center;justify-content:center;
+}
+.hcf-save:hover{border-color:var(--rose2);background:var(--rose4)}
+.hcf-save.saved{background:var(--rose4);border-color:var(--rose3)}
+
+/* ── Female-only section ── */
+.female-section{
+  background:var(--rose4);border:1.5px solid var(--rose3);
+  border-radius:18px;padding:20px 22px;margin-bottom:20px;
+  animation:fadeUp 0.4s ease 0.08s both;
+}
+.fs-title{font-family:'Recoleta',serif;font-size:18px;font-weight:700;color:var(--rose);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.fs-sub{font-size:13px;color:var(--bark3);margin-bottom:16px;line-height:1.6}
+.female-options{display:flex;flex-direction:column;gap:10px}
+.fo-item{
+  background:var(--white);border-radius:12px;padding:14px 16px;
+  display:flex;gap:12px;align-items:flex-start;
+  border:1.5px solid var(--rose3);transition:all 0.14s;cursor:pointer;
+}
+.fo-item:hover{border-color:var(--rose2);transform:translateX(3px)}
+.fo-icon{font-size:22px;flex-shrink:0}
+.fo-content{flex:1}
+.fo-name{font-size:14px;font-weight:800;color:var(--bark);margin-bottom:3px}
+.fo-desc{font-size:13px;color:var(--bark3);line-height:1.55}
+.fo-price{font-family:'Recoleta',serif;font-size:16px;font-weight:700;color:var(--rose2);flex-shrink:0;align-self:center}
+
+/* ── Tips section ── */
+.tips-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;animation:fadeUp 0.4s ease 0.1s both}
+@media(max-width:540px){.tips-grid{grid-template-columns:1fr}}
+.tip-card{
+  background:var(--white);border:1.5px solid var(--sand);border-radius:14px;padding:16px 18px;
+  border-left:3px solid var(--terra);
+}
+.tc-icon{font-size:22px;margin-bottom:9px;display:block}
+.tc-title{font-size:14px;font-weight:800;color:var(--bark);margin-bottom:5px}
+.tc-text{font-size:13px;color:var(--bark3);line-height:1.65}
+
+/* sec hdr */
+.sec-hdr{font-size:11px;font-weight:700;color:var(--bark4);text-transform:uppercase;letter-spacing:0.09em;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.sec-hdr::after{content:'';flex:1;height:1px;background:var(--sand)}
+
+.reset-link{font-size:13px;color:var(--bark4);cursor:pointer;text-decoration:underline;display:block;text-align:center;margin-top:8px;transition:color 0.15s}
+.reset-link:hover{color:var(--terra)}
+
+/* Bottom nav */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);background:var(--white);border-top:1px solid var(--sand);display:flex;justify-content:space-around;align-items:center;padding:0 8px;z-index:100}
+.bn-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 10px;border-radius:12px;cursor:pointer;flex:1;max-width:72px}
+.bn-icon{font-size:20px;opacity:0.4}
+.bn-label{font-size:10px;color:var(--bark4);font-weight:600}
+.bn-item.active .bn-icon{opacity:1}
+.bn-item.active .bn-label{color:var(--terra);font-weight:700}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="brand">
+      <div class="brand-mark">🧳</div>
+      <div class="brand-name">Solo<span>Wandr</span></div>
+    </div>
+    <div class="page-tag">🏠 Hostel Finder</div>
+  </header>
+
+  <!-- ── Search ── -->
+  <div class="search-card">
+    <div class="sc-title">Find your <em>perfect hostel</em></div>
+    <div class="sc-sub">Rated for solo travelers specifically — social vibe, female-only options, meetup culture, and the party vs quiet spectrum so you know exactly what you're walking into.</div>
+
+    <div style="margin-bottom:14px">
+      <label style="display:block;margin-bottom:8px">What matters most to you?</label>
+      <div class="vibe-row" id="vibeRow">
+        <button class="vb active" data-v="meeting other travelers">🤝 Meeting People</button>
+        <button class="vb" data-v="female-friendly or female-only options">♀ Female-Friendly</button>
+        <button class="vb" data-v="good location for solo exploring">📍 Great Location</button>
+        <button class="vb" data-v="organized social events">🎉 Organized Events</button>
+        <button class="vb" data-v="digital nomad workspace">💻 Work Space</button>
+        <button class="vb" data-v="kitchen and cooking facilities">🍳 Kitchen</button>
+        <button class="vb" data-v="safe lockers and security">🔒 Security</button>
+        <button class="vb" data-v="good value for money">💰 Best Value</button>
+      </div>
+    </div>
+
+    <div class="vibe-slider-wrap">
+      <div class="vs-title">What's your vibe?</div>
+      <div class="vs-labels">
+        <span class="vs-label party">🎉 Party Hostel</span>
+        <span class="vs-label quiet">🧘 Quiet & Chill</span>
+      </div>
+      <input type="range" class="vibe-slider" id="vibeSlider" min="1" max="5" value="3" oninput="updateVibe(this.value)" />
+      <div class="vs-current" id="vsCurrent">⚖ Balanced — social without the 3am noise</div>
+    </div>
+
+    <div class="search-row">
+      <div class="field">
+        <label>City or Destination</label>
+        <input type="text" id="destInput" placeholder="e.g. Lisbon, Hanoi, Medellín…" />
+      </div>
+      <div class="field">
+        <label>Dates</label>
+        <input type="text" id="dates" placeholder="e.g. Jul 15–22" />
+      </div>
+      <div class="field">
+        <label>Room Type</label>
+        <select id="roomType">
+          <option value="any">Any room</option>
+          <option value="mixed dorm" selected>Mixed dorm</option>
+          <option value="female-only dorm">Female-only dorm</option>
+          <option value="small dorm (4–6 beds)">Small dorm (4–6 bed)</option>
+          <option value="private room in hostel">Private room</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Budget / Night</label>
+        <select id="budget">
+          <option value="under $15/night">Under $15</option>
+          <option value="$15–$30/night" selected>$15–$30</option>
+          <option value="$30–$50/night">$30–$50</option>
+          <option value="$50+/night">$50+</option>
+        </select>
+      </div>
+      <button class="find-btn" id="findBtn" onclick="findHostels()">Find →</button>
+    </div>
+    <div class="err-bar" id="errBar"></div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-wrap" id="loadingWrap">
+    <span class="backpack-bounce">🎒</span>
+    <div class="ld-title" id="ldTitle">Finding hostels for solo travelers…</div>
+    <div class="ld-sub">Claude is scoring the social vibe, safety, and solo-friendliness</div>
+  </div>
+
+  <!-- Empty -->
+  <div class="empty-state" id="emptyState">
+    <div class="es-icon">🏠</div>
+    <div class="es-title">Your perfect hostel is out there</div>
+    <div class="es-sub">Enter a city and dial in your vibe — party scene, quiet retreat, or somewhere in between. Claude finds hostels rated specifically for solo travelers, with social scores and female-only options.</div>
+  </div>
+
+  <!-- Results -->
+  <div id="results"></div>
+
+</div>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+  <div class="bn-item"><span class="bn-icon">🏠</span><span class="bn-label">Home</span></div>
+  <div class="bn-item active"><span class="bn-icon" style="opacity:1">🎒</span><span class="bn-label" style="color:var(--terra)">Hostels</span></div>
+  <div class="bn-item"><span class="bn-icon">🌍</span><span class="bn-label">Explore</span></div>
+  <div class="bn-item"><span class="bn-icon">🛡</span><span class="bn-label">Safety</span></div>
+  <div class="bn-item"><span class="bn-icon">👤</span><span class="bn-label">Profile</span></div>
+</nav>
+
+<script>
+let priorities = new Set(['meeting other travelers']);
+let vibeValue = 3;
+let savedHostels = new Set();
+
+const VIBE_LABELS = {
+  1:'🎉 Full party hostel — expect 3am music and new best friends',
+  2:'🍺 Social & lively — bar culture, group activities, fun nights',
+  3:'⚖ Balanced — social without the 3am noise',
+  4:'😌 Relaxed & friendly — good common areas, no pressure',
+  5:'🧘 Quiet & peaceful — rest first, socializing optional'
+};
+const VIBE_NAMES = {1:'Party',2:'Social',3:'Balanced',4:'Relaxed',5:'Quiet'};
+
+const LOAD_MSGS = [
+  'Finding hostels for solo travelers…','Checking the party vs quiet vibe…',
+  'Rating the social scenes…','Checking female-only options…',
+  'Scoring solo-friendliness…','Almost done…'
+];
+let ldInt;
+
+document.querySelectorAll('.vb').forEach(btn => {
+  btn.addEventListener('click', () => {
+    btn.classList.toggle('active');
+    const v = btn.dataset.v;
+    if (priorities.has(v)) priorities.delete(v); else priorities.add(v);
+  });
+});
+
+function updateVibe(val) {
+  vibeValue = parseInt(val);
+  document.getElementById('vsCurrent').textContent = VIBE_LABELS[vibeValue];
+}
+
+async function findHostels() {
+  const dest     = document.getElementById('destInput').value.trim();
+  const dates    = document.getElementById('dates').value.trim();
+  const roomType = document.getElementById('roomType').value;
+  const budget   = document.getElementById('budget').value;
+  const prioList = [...priorities].join(', ') || 'meeting other travelers';
+  const vibeName = VIBE_NAMES[vibeValue];
+
+  document.getElementById('errBar').classList.remove('show');
+  if (!dest) {
+    document.getElementById('errBar').textContent = '⚠ Please enter a destination.';
+    document.getElementById('errBar').classList.add('show'); return;
+  }
+
+  document.getElementById('findBtn').disabled = true;
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('results').classList.remove('show');
+
+  let li = 0;
+  document.getElementById('ldTitle').textContent = LOAD_MSGS[0];
+  ldInt = setInterval(()=>{li=(li+1)%LOAD_MSGS.length;document.getElementById('ldTitle').textContent=LOAD_MSGS[li];},1600);
+  document.getElementById('loadingWrap').classList.add('show');
+
+  const prompt = `You are a solo travel hostel expert. Find and rate hostels for a solo traveler in ${dest}.
+
+Preferences: ${prioList}
+Vibe wanted: ${vibeName} (1=party, 5=quiet; they want ${vibeValue}/5)
+Room type: ${roomType}
+Budget: ${budget}
+Dates: ${dates||'flexible'}
+
+Respond ONLY with valid JSON (no markdown):
+{
+  "city": "${dest}",
+  "verdictLabel": "Excellent Hostel Scene",
+  "verdictKey": "great",
+  "summary": "2-3 sentences on the hostel scene in ${dest} for solo travelers — honest and specific",
+  "stats": {
+    "avgPrice": "$18/night",
+    "hostelCount": "40+",
+    "soloFriendly": "Highly social",
+    "bestNeighborhood": "Neighbourhood name"
+  },
+  "hostels": [
+    {
+      "name": "Real or realistic hostel name in ${dest}",
+      "icon": "🏠",
+      "neighborhood": "Neighbourhood",
+      "vibeScore": 2,
+      "vibeKey": "social",
+      "vibeLabel": "Social & Lively",
+      "stripKey": "social",
+      "pricePerNight": "$18",
+      "rating": "9.2",
+      "soloScore": "9.5",
+      "badges": ["female floor","verified","social events"],
+      "desc": "2 sentences — specific description of this hostel's vibe and why solo travelers love it",
+      "roomTypes": [
+        {"label":"Mixed 6-bed dorm","price":"$18","female":false,"private":false},
+        {"label":"Female-only 4-bed","price":"$22","female":true,"private":false},
+        {"label":"Private room","price":"$55","female":false,"private":true}
+      ],
+      "scores": [
+        {"icon":"🤝","label":"Social","val":"9.4"},
+        {"icon":"🛏","label":"Cleanliness","val":"8.8"},
+        {"icon":"📍","label":"Location","val":"9.1"},
+        {"icon":"💰","label":"Value","val":"9.5"}
+      ],
+      "highlights": [
+        "Specific highlight that makes this hostel stand out for solo travelers",
+        "Second specific highlight — facilities, events, community",
+        "Third highlight — safety, staff, or something unique"
+      ]
+    }
+  ],
+  "femaleOnlyOptions": [
+    {
+      "icon":"♀",
+      "name":"Type of female-only accommodation in ${dest}",
+      "desc":"What makes this option safe and welcoming for solo women",
+      "price":"$20/night"
+    },
+    {
+      "icon":"🏨",
+      "name":"Second female-friendly option",
+      "desc":"Description",
+      "price":"$35/night"
+    }
+  ],
+  "soloTips": [
+    {"icon":"⏰","title":"Best time to arrive","text":"When to check in to meet the most people and get the best bed in ${dest} hostels"},
+    {"icon":"🍺","title":"The social secret","text":"Best way to meet people specifically in ${dest} hostels — events, communal dinners, bar nights"},
+    {"icon":"🔒","title":"Security essentials","text":"What to know about locker security and keeping valuables safe in ${dest} hostels"},
+    {"icon":"🛏","title":"Picking the right bed","text":"Which bed in a dorm is best for solo travelers — top vs bottom, near the door or away from it"},
+    {"icon":"📱","title":"Best booking platform","text":"Which booking site has the most honest hostel reviews for ${dest} — Hostelworld, Booking.com, or direct"},
+    {"icon":"🌙","title":"Managing light and noise","text":"Practical tips for sleeping in a dorm — what to pack and hostel etiquette in ${dest}"}
+  ]
+}
+
+Generate exactly 4 hostels covering: party/social (vibeScore 1–2), balanced (3), relaxed/quiet (4–5), and one female-focused option. All hostel names should be realistic for ${dest}. All prices realistic for ${budget} in ${dest}. vibeKey options: "party","social","balanced","quiet". stripKey same.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514', max_tokens:1000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data = await res.json();
+    const text = data.content.map(b=>b.text||'').join('');
+    const clean = text.replace(/```json|```/g,'').trim();
+    const result = JSON.parse(clean);
+
+    clearInterval(ldInt);
+    document.getElementById('loadingWrap').classList.remove('show');
+    document.getElementById('findBtn').disabled = false;
+    renderResults(result, vibeValue);
+
+  } catch(err) {
+    clearInterval(ldInt);
+    document.getElementById('loadingWrap').classList.remove('show');
+    document.getElementById('findBtn').disabled = false;
+    document.getElementById('emptyState').style.display = 'block';
+    document.getElementById('errBar').textContent = '⚠ Could not find hostels. Please try again.';
+    document.getElementById('errBar').classList.add('show');
+    console.error(err);
+  }
+}
+
+const VERDICT_CLS = {great:'cv-great',good:'cv-good',mixed:'cv-mixed'};
+const BADGE_CLS = {
+  'female floor':'hcb-female','female-only':'hcb-female','women only':'hcb-female',
+  'party':'hcb-party','social events':'hcb-social','organized events':'hcb-social',
+  'balanced':'hcb-balanced','nomad workspace':'hcb-nomad','wifi':'hcb-nomad',
+  'quiet zone':'hcb-quiet','chill':'hcb-quiet',
+  'verified':'hcb-verified','top rated':'hcb-verified',
+};
+const STRIP_CLS = {party:'strip-party',social:'strip-social',balanced:'strip-balanced',quiet:'strip-quiet'};
+const VIBE_COLOR = {party:'#C05028',social:'#C4622D',balanced:'#B88828',quiet:'#285890'};
+const VIBE_PCT = {1:'5%',2:'25%',3:'50%',4:'75%',5:'95%'};
+
+function renderResults(d, userVibe) {
+  const verdictCls = VERDICT_CLS[d.verdictKey]||VERDICT_CLS.good;
+  const s = d.stats||{};
+
+  // City overview
+  const overviewHtml = `
+    <div class="city-overview">
+      <div class="co-inner">
+        <div class="co-eyebrow">🎒 Hostel Guide · ${d.city}</div>
+        <div class="co-city">${d.city}</div>
+        <span class="co-verdict ${verdictCls}">${d.verdictLabel}</span>
+        <div class="co-summary">${d.summary}</div>
+        <div class="co-stats">
+          <div class="cos-item"><div class="cosi-val">${s.avgPrice||'—'}</div><div class="cosi-lbl">Avg dorm price</div></div>
+          <div class="cos-item"><div class="cosi-val">${s.hostelCount||'—'}</div><div class="cosi-lbl">Hostels</div></div>
+          <div class="cos-item"><div class="cosi-val">${s.soloFriendly||'—'}</div><div class="cosi-lbl">Solo scene</div></div>
+          <div class="cos-item"><div class="cosi-val">${s.bestNeighborhood||'—'}</div><div class="cosi-lbl">Best area</div></div>
+        </div>
+      </div>
+    </div>`;
+
+  // Party/Quiet spectrum bar with hostel markers
+  const spectrumDots = (d.hostels||[]).map((h,i)=>{
+    const pct = VIBE_PCT[h.vibeScore||3];
+    const color = VIBE_COLOR[h.vibeKey||'balanced'];
+    return `<div class="sb-hostel-dot" style="left:${pct};background:${color}" title="${h.name} — ${h.vibeLabel}"></div>`;
+  }).join('');
+  const userPct = VIBE_PCT[userVibe];
+  const spectrumHtml = `
+    <div class="spectrum-bar">
+      <div class="sb-title">
+        <span>Party ← → Quiet Spectrum</span>
+        <span style="font-size:12px;color:var(--terra)">▲ Your preference at ${Math.round((userVibe-1)/4*100)}%</span>
+      </div>
+      <div class="sb-track">
+        ${spectrumDots}
+        <div style="position:absolute;top:-4px;left:${userPct};transform:translateX(-50%);font-size:14px;z-index:3" title="Your preference">▲</div>
+      </div>
+      <div class="sb-labels"><span>🎉 Party</span><span>⚖ Balanced</span><span>🧘 Quiet</span></div>
+    </div>`;
+
+  // Hostel cards
+  const hostelsHtml = (d.hostels||[]).map((h,i)=>{
+    const strip = STRIP_CLS[h.stripKey||'balanced'];
+    const badgesHtml = (h.badges||[]).map(b=>{
+      const key = Object.keys(BADGE_CLS).find(k=>b.toLowerCase().includes(k))||'verified';
+      return `<span class="hcb ${BADGE_CLS[key]||'hcb-balanced'}">${b}</span>`;
+    }).join('');
+    const roomsHtml = (h.roomTypes||[]).map(r=>`
+      <div class="rt-chip ${r.female?'rt-female':r.private?'rt-private':''}">
+        ${r.female?'♀ ':r.private?'🔑 ':'🛏 '}${r.label} · ${r.price}
+      </div>`).join('');
+    const scoresHtml = (h.scores||[]).map(sc=>`
+      <div class="hcs-cell">
+        <span class="hcs-icon">${sc.icon}</span>
+        <div class="hcs-label">${sc.label}</div>
+        <div class="hcs-val">${sc.val}</div>
+      </div>`).join('');
+    const hlHtml = (h.highlights||[]).map(hl=>`
+      <div class="hch-item"><span class="hch-dot">→</span><span>${hl}</span></div>`).join('');
+    const vibePct = VIBE_PCT[h.vibeScore||3];
+    const vibeColor = VIBE_COLOR[h.vibeKey||'balanced'];
+
+    return `
+    <div class="hostel-card" style="animation-delay:${i*0.07}s">
+      <div class="hc-strip ${strip}"></div>
+      <div class="hc-header">
+        <div class="hc-avatar" style="background:${vibeColor}20;border:1.5px solid ${vibeColor}40">${h.icon||'🏠'}</div>
+        <div class="hc-info">
+          <div class="hc-name">${h.name}</div>
+          <div class="hc-meta"><span>📍 ${h.neighborhood||d.city}</span></div>
+          <div class="hc-badges">${badgesHtml}</div>
+        </div>
+        <div class="hc-right">
+          <div class="hcr-price">${h.pricePerNight}</div>
+          <div class="hcr-night">per night</div>
+          <div class="hcr-rating">★ ${h.rating}</div>
+          <div class="hcr-solo">Solo ${h.soloScore}</div>
+        </div>
+      </div>
+      <div class="hc-body">
+        <div class="vibe-indicator">
+          <span class="vi-label-l">Party</span>
+          <div class="vi-track">
+            <div class="vi-thumb" style="left:${vibePct};background:${vibeColor}"></div>
+          </div>
+          <span class="vi-label-r">Quiet</span>
+        </div>
+        <div style="text-align:center;font-size:12px;font-weight:700;color:${vibeColor};margin-top:-6px;margin-bottom:10px">${h.vibeLabel}</div>
+        <div class="hc-desc">${h.desc}</div>
+        <div class="hc-scores">${scoresHtml}</div>
+        <div class="room-types">${roomsHtml}</div>
+        <div class="hc-highlights">${hlHtml}</div>
+      </div>
+      <div class="hc-footer">
+        <button class="hcf-book" onclick="bookHostel('${h.name.replace(/'/g,'`')}')">Book Now →</button>
+        <button class="hcf-save ${savedHostels.has(h.name)?'saved':''}" id="save-h-${i}" onclick="saveHostel('${h.name.replace(/'/g,'`')}',${i})" title="Save">${savedHostels.has(h.name)?'♥':'♡'}</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Female-only section
+  const femaleHtml = (d.femaleOnlyOptions||[]).map(f=>`
+    <div class="fo-item">
+      <span class="fo-icon">${f.icon||'♀'}</span>
+      <div class="fo-content">
+        <div class="fo-name">${f.name}</div>
+        <div class="fo-desc">${f.desc}</div>
+      </div>
+      <div class="fo-price">${f.price}</div>
+    </div>`).join('');
+
+  // Tips grid
+  const tipsHtml = (d.soloTips||[]).map(t=>`
+    <div class="tip-card">
+      <span class="tc-icon">${t.icon}</span>
+      <div class="tc-title">${t.title}</div>
+      <div class="tc-text">${t.text}</div>
+    </div>`).join('');
+
+  document.getElementById('results').innerHTML = `
+    ${overviewHtml}
+    ${spectrumHtml}
+    <div class="sec-hdr">Hostels Matched to Your Vibe</div>
+    <div class="hostels-grid">${hostelsHtml}</div>
+    <div class="female-section">
+      <div class="fs-title">♀ Female-Friendly Options</div>
+      <div class="fs-sub">Female-only dorms and women-first accommodation options in ${d.city} — rated for safety, comfort, and community.</div>
+      <div class="female-options">${femaleHtml}</div>
+    </div>
+    <div class="sec-hdr">Solo Hostel Playbook</div>
+    <div class="tips-grid">${tipsHtml}</div>
+    <span class="reset-link" onclick="resetForm()">← Find hostels in another city</span>
+  `;
+
+  document.getElementById('results').classList.add('show');
+}
+
+function bookHostel(name) {
+  alert(`🏠 Opening booking page for ${name}…\n\nIn the full app this opens Hostelworld or Booking.com with your dates pre-filled and tracks your saved hostels.`);
+}
+
+function saveHostel(name,i) {
+  const btn = document.getElementById(`save-h-${i}`);
+  if (savedHostels.has(name)) {
+    savedHostels.delete(name);
+    if(btn){btn.textContent='♡';btn.classList.remove('saved')}
+  } else {
+    savedHostels.add(name);
+    if(btn){btn.textContent='♥';btn.classList.add('saved')}
+  }
+}
+
+function resetForm() {
+  document.getElementById('results').innerHTML='';
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('emptyState').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.getElementById('destInput').addEventListener('keydown',e=>{if(e.key==='Enter')findHostels()});
+</script>
+</body>
+</html>

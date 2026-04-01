@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SoloWandr — Solo Destination Finder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Recoleta:wght@400;500;700&family=Nunito:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --terra:#C4622D;--terra2:#D4794A;--terra3:#F2D0BF;--terra4:#FDF3EE;
+  --sand:#E8D5B8;--sand2:#F5ECD8;--sand3:#FAF6EE;--linen:#FBF8F2;
+  --bark:#2C1F14;--bark2:#4A3728;--bark3:#7A6050;--bark4:#B0A090;
+  --moss:#3A5C3A;--moss2:#4E7A4E;--moss3:#C8DCC8;--moss4:#EEF5EE;
+  --sky:#2A5878;--sky2:#3A7098;--sky3:#C4D8E8;--sky4:#EEF4F9;
+  --gold:#8A6820;--gold2:#B88828;--gold3:#F8E4A8;--gold4:#FFFAEE;
+  --rose:#8A2040;--rose2:#B83060;--rose3:#F4C0D0;--rose4:#FDF0F4;
+  --teal:#1A6060;--teal2:#268080;--teal3:#C0DEDE;--teal4:#EAF6F6;
+  --white:#FFFFFF;--r:16px;
+}
+
+body{
+  font-family:'Nunito',sans-serif;
+  background:var(--linen);color:var(--bark);
+  min-height:100vh;overflow-x:hidden;
+}
+
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 60% 40% at 90% 10%,rgba(196,98,45,0.06) 0%,transparent 55%),
+    radial-gradient(ellipse 50% 50% at 10% 90%,rgba(42,88,120,0.05) 0%,transparent 55%);
+  pointer-events:none;z-index:0;
+}
+
+.app{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:0 20px 80px}
+
+/* ── Header ── */
+header{
+  padding:28px 0 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:16px;flex-wrap:wrap;
+  border-bottom:1px solid var(--sand);margin-bottom:28px;
+}
+.brand{display:flex;align-items:center;gap:8px;text-decoration:none}
+.brand-mark{
+  width:32px;height:32px;border-radius:9px;
+  background:var(--terra);display:flex;align-items:center;justify-content:center;font-size:16px;
+}
+.brand-name{font-family:'Recoleta',serif;font-size:18px;font-weight:700;color:var(--bark)}
+.brand-name span{color:var(--terra)}
+.page-tag{
+  background:var(--terra4);border:1px solid var(--terra3);
+  color:var(--terra);font-size:12px;font-weight:700;
+  padding:5px 14px;border-radius:100px;letter-spacing:0.03em;
+}
+
+/* ── Search panel ── */
+.search-panel{
+  background:var(--white);border-radius:22px;
+  border:1.5px solid var(--sand);padding:28px 30px;
+  margin-bottom:26px;
+  box-shadow:0 2px 16px rgba(44,31,20,0.06);
+}
+.sp-title{
+  font-family:'Recoleta',serif;font-size:26px;font-weight:700;
+  color:var(--bark);margin-bottom:6px;letter-spacing:-0.5px;
+}
+.sp-title em{color:var(--terra);font-style:italic}
+.sp-sub{font-size:14px;color:var(--bark3);margin-bottom:22px;line-height:1.6}
+
+.search-row{
+  display:grid;grid-template-columns:1fr 170px 170px auto;
+  gap:12px;align-items:end;margin-bottom:14px;
+}
+@media(max-width:680px){.search-row{grid-template-columns:1fr 1fr}}
+@media(max-width:440px){.search-row{grid-template-columns:1fr}}
+
+.field{display:flex;flex-direction:column;gap:6px}
+label{font-size:10px;font-weight:700;color:var(--bark3);text-transform:uppercase;letter-spacing:0.09em}
+
+input,select{
+  font-family:'Nunito',sans-serif;font-size:14px;color:var(--bark);
+  background:var(--linen);border:1.5px solid var(--sand);
+  border-radius:10px;padding:10px 14px;width:100%;outline:none;
+  transition:border-color 0.2s,box-shadow 0.2s;appearance:none;
+}
+input::placeholder{color:var(--bark4)}
+input:focus,select:focus{border-color:var(--terra);box-shadow:0 0 0 3px rgba(196,98,45,0.1);background:var(--white)}
+
+.score-btn{
+  padding:10px 26px;border-radius:10px;border:none;
+  background:var(--terra);color:white;
+  font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;
+  cursor:pointer;white-space:nowrap;transition:all 0.18s;
+}
+.score-btn:hover{background:var(--terra2);transform:translateY(-1px);box-shadow:0 5px 18px rgba(196,98,45,0.28)}
+.score-btn:disabled{opacity:0.45;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* traveler type chips */
+.type-chips{display:flex;gap:7px;flex-wrap:wrap}
+.tc{
+  padding:7px 16px;border-radius:100px;
+  border:1.5px solid var(--sand);background:none;
+  font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;
+  color:var(--bark2);cursor:pointer;transition:all 0.14s;user-select:none;
+}
+.tc:hover{border-color:var(--terra);color:var(--terra)}
+.tc.active{background:var(--terra);border-color:var(--terra);color:white}
+
+.err-bar{font-size:13px;color:var(--terra);background:var(--terra4);border:1px solid var(--terra3);border-radius:9px;padding:10px 14px;margin-top:12px;display:none}
+.err-bar.show{display:block}
+
+/* ── Loading ── */
+.loading-wrap{display:none;text-align:center;padding:64px 20px}
+.loading-wrap.show{display:block}
+.compass{
+  width:64px;height:64px;border-radius:50%;
+  border:3px solid var(--sand);border-top-color:var(--terra);
+  margin:0 auto 20px;
+  animation:spin 1s linear infinite;
+  position:relative;
+  display:flex;align-items:center;justify-content:center;font-size:28px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ld-title{font-family:'Recoleta',serif;font-size:20px;font-weight:700;color:var(--bark2);font-style:italic}
+.ld-sub{font-size:13px;color:var(--bark4);margin-top:6px}
+
+/* ── Empty ── */
+.empty-state{text-align:center;padding:64px 20px}
+.es-icon{font-size:56px;margin-bottom:14px;opacity:0.2}
+.es-title{font-family:'Recoleta',serif;font-size:22px;font-weight:700;font-style:italic;color:var(--bark2);margin-bottom:8px}
+.es-sub{font-size:13px;color:var(--bark4);max-width:380px;margin:0 auto;line-height:1.65}
+
+/* ── RESULTS ── */
+#results{display:none}
+#results.show{display:block}
+
+/* ── Score hero ── */
+.score-hero{
+  background:var(--bark);border-radius:24px;padding:30px 32px;
+  margin-bottom:22px;display:flex;gap:28px;align-items:center;flex-wrap:wrap;
+  animation:riseUp 0.4s ease both;
+  position:relative;overflow:hidden;
+}
+@keyframes riseUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.score-hero::before{
+  content:'';position:absolute;top:-60px;right:-60px;
+  width:240px;height:240px;border-radius:50%;
+  background:rgba(196,98,45,0.1);pointer-events:none;
+}
+
+/* SVG score ring */
+.score-ring-wrap{position:relative;width:130px;height:130px;flex-shrink:0}
+.score-ring-svg{width:130px;height:130px;transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:rgba(255,255,255,0.08);stroke-width:10}
+.ring-fill{
+  fill:none;stroke-width:10;stroke-linecap:round;
+  stroke-dasharray:345;stroke-dashoffset:345;
+  transition:stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1) 0.3s;
+}
+.ring-fill.green{stroke:#4E7A4E}
+.ring-fill.amber{stroke:#B88828}
+.ring-fill.red{stroke:#C4622D}
+.score-ring-num{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+}
+.srn-num{font-family:'Recoleta',serif;font-size:38px;font-weight:700;color:white;line-height:1}
+.srn-label{font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px;text-transform:uppercase;letter-spacing:0.07em}
+
+.score-info{flex:1;position:relative;z-index:1}
+.si-dest{font-size:11px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.09em;margin-bottom:5px}
+.si-title{font-family:'Recoleta',serif;font-size:26px;font-weight:700;color:white;margin-bottom:6px;line-height:1.15}
+.si-verdict{
+  font-size:14px;font-weight:700;
+  padding:5px 14px;border-radius:100px;
+  display:inline-block;margin-bottom:12px;
+}
+.verdict-great{background:rgba(78,122,78,0.25);color:#8AC88A}
+.verdict-good{background:rgba(184,136,40,0.25);color:#E8C060}
+.verdict-mixed{background:rgba(196,98,45,0.25);color:#E8A070}
+.verdict-challenging{background:rgba(180,80,80,0.25);color:#F09090}
+
+.si-summary{font-size:14px;color:rgba(255,255,255,0.72);line-height:1.7;max-width:500px}
+
+/* quick stats */
+.quick-stats{
+  display:flex;gap:0;flex-wrap:wrap;
+  background:var(--white);border:1.5px solid var(--sand);
+  border-radius:16px;overflow:hidden;margin-bottom:22px;
+  animation:riseUp 0.4s ease 0.08s both;
+}
+.qs-cell{
+  flex:1;min-width:100px;padding:16px 18px;
+  border-right:1px solid var(--sand);
+}
+.qs-cell:last-child{border-right:none}
+.qs-label{font-size:10px;font-weight:700;color:var(--bark4);text-transform:uppercase;letter-spacing:0.09em;margin-bottom:4px}
+.qs-val{font-family:'Recoleta',serif;font-size:20px;font-weight:700;color:var(--bark)}
+.qs-val.good{color:var(--moss2)}
+.qs-val.warn{color:var(--gold2)}
+.qs-val.bad{color:var(--terra)}
+
+/* ── Score breakdown ── */
+.breakdown-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px}
+@media(max-width:540px){.breakdown-grid{grid-template-columns:1fr}}
+
+.score-card{
+  background:var(--white);border:1.5px solid var(--sand);
+  border-radius:var(--r);padding:18px 20px;
+  animation:riseUp 0.4s ease both;
+  transition:all 0.18s;cursor:pointer;
+}
+.score-card:hover{border-color:var(--terra3);transform:translateY(-2px);box-shadow:0 8px 24px rgba(44,31,20,0.08)}
+
+.sc-top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.sc-icon{
+  width:38px;height:38px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+}
+.sc-name{font-size:14px;font-weight:800;color:var(--bark);flex:1}
+.sc-score-num{
+  font-family:'Recoleta',serif;font-size:22px;font-weight:700;
+}
+
+.sc-bar{height:8px;background:var(--linen);border-radius:4px;overflow:hidden;margin-bottom:10px}
+.sc-fill{height:100%;border-radius:4px;transition:width 1.2s cubic-bezier(0.4,0,0.2,1) 0.5s;width:0}
+
+.sc-desc{font-size:13px;color:var(--bark3);line-height:1.6;margin-bottom:8px}
+.sc-tags{display:flex;gap:5px;flex-wrap:wrap}
+.sc-tag{font-size:11px;font-weight:700;padding:3px 9px;border-radius:100px;background:var(--linen);color:var(--bark3)}
+
+/* ── Traveler type verdicts ── */
+.traveler-verdicts{
+  background:var(--white);border:1.5px solid var(--sand);
+  border-radius:18px;overflow:hidden;margin-bottom:22px;
+  animation:riseUp 0.4s ease 0.1s both;
+}
+.tv-header{
+  padding:16px 20px;background:var(--sand3);border-bottom:1px solid var(--sand);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.tv-title{font-family:'Recoleta',serif;font-size:18px;font-weight:700;color:var(--bark)}
+.tv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:0}
+.tv-item{
+  padding:16px 18px;border-right:1px solid var(--sand);border-bottom:1px solid var(--sand);
+}
+.tv-item:nth-child(even){border-right:none}
+@media(min-width:720px){
+  .tv-item:nth-child(3n){border-right:none}
+  .tv-item:nth-child(n+4){border-bottom:none}
+}
+.tv-icon{font-size:22px;margin-bottom:8px;display:block}
+.tv-type{font-size:13px;font-weight:800;color:var(--bark);margin-bottom:4px}
+.tv-score{
+  font-size:12px;font-weight:700;padding:3px 10px;border-radius:100px;
+  display:inline-block;margin-bottom:5px;
+}
+.tvs-great{background:var(--moss4);color:var(--moss2)}
+.tvs-good{background:var(--gold4);color:var(--gold2)}
+.tvs-mixed{background:var(--terra4);color:var(--terra)}
+.tvs-hard{background:var(--rose4);color:var(--rose2)}
+.tv-note{font-size:12px;color:var(--bark3);line-height:1.55}
+
+/* ── Best & Worst months ── */
+.months-section{
+  background:var(--white);border:1.5px solid var(--sand);
+  border-radius:18px;overflow:hidden;margin-bottom:22px;
+  animation:riseUp 0.4s ease 0.12s both;
+}
+.ms-header{padding:16px 20px;border-bottom:1px solid var(--sand);background:var(--sand3)}
+.ms-title{font-family:'Recoleta',serif;font-size:18px;font-weight:700;color:var(--bark)}
+.months-row{display:flex;gap:0;overflow-x:auto}
+.month-chip{
+  flex:1;min-width:70px;padding:14px 10px;
+  text-align:center;border-right:1px solid var(--sand);
+  cursor:pointer;transition:background 0.14s;
+}
+.month-chip:last-child{border-right:none}
+.month-chip:hover{background:var(--sand3)}
+.month-chip.best{background:var(--moss4)}
+.month-chip.avoid{background:var(--rose4)}
+.mc-name{font-size:11px;font-weight:700;color:var(--bark3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px}
+.mc-score{font-family:'Recoleta',serif;font-size:18px;font-weight:700}
+.mc-score.s-great{color:var(--moss2)}
+.mc-score.s-good{color:var(--gold2)}
+.mc-score.s-avoid{color:var(--rose2)}
+.mc-icon{font-size:14px;margin-top:4px}
+
+/* ── Nearby alternatives ── */
+.nearby-section{
+  background:var(--sand3);border:1.5px solid var(--sand);
+  border-radius:18px;padding:22px 24px;margin-bottom:22px;
+  animation:riseUp 0.4s ease 0.15s both;
+}
+.nearby-title{font-family:'Recoleta',serif;font-size:18px;font-weight:700;color:var(--bark);margin-bottom:6px}
+.nearby-sub{font-size:13px;color:var(--bark3);margin-bottom:16px}
+.nearby-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.nearby-card{
+  background:var(--white);border-radius:12px;padding:14px 16px;
+  border:1.5px solid var(--sand);cursor:pointer;transition:all 0.15s;
+}
+.nearby-card:hover{border-color:var(--terra);transform:translateY(-1px)}
+.nc-dest{font-size:14px;font-weight:800;color:var(--bark);margin-bottom:3px}
+.nc-score{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.nc-badge{font-size:11px;font-weight:700;padding:2px 9px;border-radius:100px}
+.nc-why{font-size:12px;color:var(--bark3);line-height:1.5}
+
+/* ── Claude insights ── */
+.insights-section{
+  background:var(--terra4);border:1.5px solid var(--terra3);
+  border-radius:18px;padding:22px 24px;margin-bottom:22px;
+  animation:riseUp 0.4s ease 0.18s both;
+}
+.is-title{font-family:'Recoleta',serif;font-size:18px;font-weight:700;color:var(--bark);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.insight-items{display:flex;flex-direction:column;gap:10px}
+.insight-item{
+  display:flex;gap:10px;align-items:flex-start;
+  padding:13px 16px;background:var(--white);border-radius:12px;
+  font-size:13px;color:var(--bark2);line-height:1.65;
+  border-left:3px solid var(--terra);
+  animation:riseUp 0.35s ease both;
+}
+.ii-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+
+/* reset */
+.reset-link{font-size:13px;color:var(--bark4);cursor:pointer;text-decoration:underline;display:inline-block;margin-top:10px;transition:color 0.15s}
+.reset-link:hover{color:var(--terra)}
+
+/* score color helpers */
+.fill-great{background:var(--moss2)}
+.fill-good{background:var(--gold2)}
+.fill-mixed{background:var(--terra2)}
+.fill-hard{background:var(--rose2)}
+.num-great{color:var(--moss2)}
+.num-good{color:var(--gold2)}
+.num-mixed{color:var(--terra)}
+.num-hard{color:var(--rose2)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="brand">
+      <div class="brand-mark">🧳</div>
+      <div class="brand-name">Solo<span>Wandr</span></div>
+    </div>
+    <div class="page-tag">✦ Solo Destination Finder</div>
+  </header>
+
+  <!-- ── Search ── -->
+  <div class="search-panel">
+    <div class="sp-title">How <em>solo-friendly</em> is it?</div>
+    <div class="sp-sub">Score any city or country across 8 dimensions that actually matter to solo travelers — safety, social scene, transport, cost, English accessibility, and more.</div>
+
+    <div style="margin-bottom:14px">
+      <label style="display:block;margin-bottom:8px">I am a…</label>
+      <div class="type-chips" id="typeChips">
+        <button class="tc active" data-t="solo traveler">🧳 Solo Traveler</button>
+        <button class="tc" data-t="solo female">♀ Solo Woman</button>
+        <button class="tc" data-t="digital nomad">💻 Digital Nomad</button>
+        <button class="tc" data-t="first-time solo traveler">⭐ First Timer</button>
+        <button class="tc" data-t="solo senior">👴 Solo Senior</button>
+        <button class="tc" data-t="solo backpacker">🎒 Backpacker</button>
+      </div>
+    </div>
+
+    <div class="search-row">
+      <div class="field">
+        <label>Destination</label>
+        <input type="text" id="destInput" placeholder="e.g. Lisbon, Tokyo, Colombia, Southeast Asia…" />
+      </div>
+      <div class="field">
+        <label>Budget Level</label>
+        <select id="budgetLevel">
+          <option value="budget">$ Budget</option>
+          <option value="mid-range" selected>$$ Mid-range</option>
+          <option value="luxury">$$$ Luxury</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Trip Length</label>
+        <select id="tripLength">
+          <option value="a weekend">Weekend</option>
+          <option value="1 week" selected>1 Week</option>
+          <option value="2 weeks">2 Weeks</option>
+          <option value="1 month">1 Month</option>
+          <option value="long-term">Long-term</option>
+        </select>
+      </div>
+      <button class="score-btn" id="scoreBtn" onclick="scoreDestination()">Score It →</button>
+    </div>
+    <div class="err-bar" id="errBar"></div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-wrap" id="loadingWrap">
+    <div class="compass">🧭</div>
+    <div class="ld-title" id="ldTitle">Scoring your destination…</div>
+    <div class="ld-sub">Claude is analysing solo travel conditions across 8 dimensions</div>
+  </div>
+
+  <!-- Empty -->
+  <div class="empty-state" id="emptyState">
+    <div class="es-icon">🌍</div>
+    <div class="es-title">Find your perfect solo destination</div>
+    <div class="es-sub">Enter any city or country and Claude scores it specifically for solo travel — covering safety, social scene, transport, cost, and everything that matters when you're on your own.</div>
+  </div>
+
+  <!-- Results -->
+  <div id="results"></div>
+
+</div>
+
+<script>
+let travelerType = 'solo traveler';
+const LOAD_MSGS = [
+  'Scoring your destination…','Checking solo safety data…',
+  'Rating the social scene…','Analysing transport options…',
+  'Consulting the solo traveler community…','Almost ready…'
+];
+let ldInt;
+
+document.querySelectorAll('.tc').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tc').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    travelerType = btn.dataset.t;
+  });
+});
+
+async function scoreDestination() {
+  const dest   = document.getElementById('destInput').value.trim();
+  const budget = document.getElementById('budgetLevel').value;
+  const length = document.getElementById('tripLength').value;
+
+  document.getElementById('errBar').classList.remove('show');
+  if (!dest) {
+    document.getElementById('errBar').textContent = '⚠ Please enter a destination to score.';
+    document.getElementById('errBar').classList.add('show'); return;
+  }
+
+  document.getElementById('scoreBtn').disabled = true;
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('results').classList.remove('show');
+
+  let li = 0;
+  document.getElementById('ldTitle').textContent = LOAD_MSGS[0];
+  ldInt = setInterval(() => { li=(li+1)%LOAD_MSGS.length; document.getElementById('ldTitle').textContent=LOAD_MSGS[li]; }, 1700);
+  document.getElementById('loadingWrap').classList.add('show');
+
+  const prompt = `You are SoloWandr's AI scoring engine. Score "${dest}" as a solo travel destination for a ${travelerType} on a ${budget} budget for ${length}.
+
+Be honest, specific, and nuanced. A score of 10 is extremely rare.
+
+Respond ONLY with valid JSON (no markdown, no backticks):
+{
+  "destination": "Full destination name",
+  "country": "Country name",
+  "overallScore": 8.2,
+  "verdictLabel": "Excellent for Solo Travel",
+  "verdictKey": "great",
+  "summary": "2-3 honest, specific sentences about what solo travel is like here for a ${travelerType}",
+  "quickStats": {
+    "avgDailyCost": "$65",
+    "englishLevel": "Widely spoken",
+    "soloRating": "Highly recommended",
+    "topFor": "Culture & food"
+  },
+  "categories": [
+    {
+      "id": "safety",
+      "name": "Safety",
+      "icon": "🛡",
+      "score": 8.5,
+      "colorKey": "great",
+      "bgColor": "#EEF5EE",
+      "description": "2 sentences on the specific safety situation for solo travelers in ${dest}",
+      "tags": ["Low petty crime", "Safe at night", "Tourist police"]
+    },
+    {
+      "id": "social",
+      "name": "Social Scene",
+      "icon": "🤝",
+      "score": 9.0,
+      "colorKey": "great",
+      "bgColor": "#EEF4F9",
+      "description": "How easy is it to meet other travelers and locals? Specific venues or hotspots.",
+      "tags": ["Buzzing hostel scene", "Easy to meet people", "Traveler-heavy"]
+    },
+    {
+      "id": "transport",
+      "name": "Getting Around",
+      "icon": "🚌",
+      "score": 7.5,
+      "colorKey": "good",
+      "bgColor": "#FFFAEE",
+      "description": "Public transport, ride apps, walking safety. Specific apps or routes.",
+      "tags": ["Grab / Uber available", "Good metro", "Walkable center"]
+    },
+    {
+      "id": "cost",
+      "name": "Solo Value",
+      "icon": "💰",
+      "score": 8.8,
+      "colorKey": "great",
+      "bgColor": "#EEF5EE",
+      "description": "Single supplement situation, hostel quality vs cost, eating solo affordability.",
+      "tags": ["No single supplement issue", "Cheap street food", "Great hostel value"]
+    },
+    {
+      "id": "english",
+      "name": "English Access",
+      "icon": "💬",
+      "score": 6.5,
+      "colorKey": "good",
+      "bgColor": "#FFFAEE",
+      "description": "How navigable is it without the local language? Apps, signage, staff.",
+      "tags": ["Google Translate works well", "Tourist areas fine", "Learn a few phrases"]
+    },
+    {
+      "id": "female",
+      "name": "Solo Female",
+      "icon": "♀",
+      "score": 7.8,
+      "colorKey": "good",
+      "bgColor": "#FDF0F4",
+      "description": "Honest assessment for solo women — harassment level, dress norms, safe areas.",
+      "tags": ["Generally safe", "Dress modestly", "Busy areas fine at night"]
+    },
+    {
+      "id": "activities",
+      "name": "Solo Activities",
+      "icon": "🎭",
+      "score": 9.2,
+      "colorKey": "great",
+      "bgColor": "#EEF4F9",
+      "description": "Tours, experiences, and activities that work well for one person.",
+      "tags": ["Free walking tours", "Easy group day trips", "Rich street food scene"]
+    },
+    {
+      "id": "nomad",
+      "name": "Digital Nomad",
+      "icon": "💻",
+      "score": 7.0,
+      "colorKey": "good",
+      "bgColor": "#FFFAEE",
+      "description": "Wifi quality, coworking scene, visas and long-stay options.",
+      "tags": ["Coworking spaces available", "Good wifi in cafés", "Check visa rules"]
+    }
+  ],
+  "travelerVerdicts": [
+    {"type": "First-timer", "icon": "⭐", "scoreKey": "great", "scoreLabel": "Perfect Start", "note": "One sentence why this is/isn't good for first-time soloists"},
+    {"type": "Solo Woman", "icon": "♀", "scoreKey": "good", "scoreLabel": "Generally Safe", "note": "Specific note for solo women"},
+    {"type": "Digital Nomad", "icon": "💻", "scoreKey": "good", "scoreLabel": "Nomad Friendly", "note": "Nomad-specific note"},
+    {"type": "Backpacker", "icon": "🎒", "scoreKey": "great", "scoreLabel": "Backpacker Haven", "note": "Budget travel note"},
+    {"type": "Solo Senior", "icon": "👴", "scoreKey": "good", "scoreLabel": "Senior Friendly", "note": "Accessibility and pace note"},
+    {"type": "Luxury Solo", "icon": "✨", "scoreKey": "great", "scoreLabel": "Excellent", "note": "Luxury solo experience note"}
+  ],
+  "months": [
+    {"name": "Jan", "score": 7.5, "icon": "☀", "best": false, "avoid": false},
+    {"name": "Feb", "score": 8.0, "icon": "☀", "best": false, "avoid": false},
+    {"name": "Mar", "score": 8.5, "icon": "🌤", "best": true, "avoid": false},
+    {"name": "Apr", "score": 9.0, "icon": "🌸", "best": true, "avoid": false},
+    {"name": "May", "score": 8.2, "icon": "🌤", "best": false, "avoid": false},
+    {"name": "Jun", "score": 6.5, "icon": "🌧", "best": false, "avoid": true},
+    {"name": "Jul", "score": 5.5, "icon": "⛈", "best": false, "avoid": true},
+    {"name": "Aug", "score": 6.0, "icon": "🌧", "best": false, "avoid": true},
+    {"name": "Sep", "score": 7.8, "icon": "🌤", "best": false, "avoid": false},
+    {"name": "Oct", "score": 9.1, "icon": "☀", "best": true, "avoid": false},
+    {"name": "Nov", "score": 8.4, "icon": "🌤", "best": true, "avoid": false},
+    {"name": "Dec", "score": 7.2, "icon": "⛅", "best": false, "avoid": false}
+  ],
+  "nearbyAlternatives": [
+    {"dest": "Similar destination 1", "score": 8.8, "scoreKey": "great", "why": "Why this is a great alternative or complement"},
+    {"dest": "Similar destination 2", "score": 7.9, "scoreKey": "good", "why": "Why consider this instead or alongside"},
+    {"dest": "Budget alternative", "score": 8.1, "scoreKey": "great", "why": "Cheaper option with similar solo vibe"}
+  ],
+  "insights": [
+    {"icon": "💡", "text": "The single most useful insider insight for a ${travelerType} in ${dest}"},
+    {"icon": "⚠", "text": "The most important thing to watch out for as a solo traveler here"},
+    {"icon": "✨", "text": "The hidden gem or unexpected highlight that solo travelers love about ${dest}"},
+    {"icon": "🤝", "text": "The best way to meet other solo travelers specifically in ${dest}"}
+  ]
+}
+
+Score ALL 8 categories realistically. Overall score = weighted average. Be honest about negatives. All scores must be between 1.0 and 10.0. colorKey options: "great" (8+), "good" (6-7.9), "mixed" (4-5.9), "hard" (below 4). travelerVerdicts scoreKey options: "great", "good", "mixed", "hard".`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514', max_tokens:1000,
+        messages:[{role:'user', content:prompt}]
+      })
+    });
+    const data = await res.json();
+    const text = data.content.map(b=>b.text||'').join('');
+    const clean = text.replace(/```json|```/g,'').trim();
+    const result = JSON.parse(clean);
+
+    clearInterval(ldInt);
+    document.getElementById('loadingWrap').classList.remove('show');
+    document.getElementById('scoreBtn').disabled = false;
+    renderResults(result);
+
+  } catch(err) {
+    clearInterval(ldInt);
+    document.getElementById('loadingWrap').classList.remove('show');
+    document.getElementById('scoreBtn').disabled = false;
+    document.getElementById('emptyState').style.display = 'block';
+    document.getElementById('errBar').textContent = '⚠ Could not score destination. Please try again.';
+    document.getElementById('errBar').classList.add('show');
+    console.error(err);
+  }
+}
+
+const COLOR_MAP = {great:{fill:'fill-great',num:'num-great'},good:{fill:'fill-good',num:'num-good'},mixed:{fill:'fill-mixed',num:'num-mixed'},hard:{fill:'fill-hard',num:'num-hard'}};
+const VERDICT_CLASS = {great:'verdict-great',good:'verdict-good',mixed:'verdict-mixed',challenging:'verdict-challenging',hard:'verdict-challenging'};
+const TV_SCORE_CLASS = {great:'tvs-great',good:'tvs-good',mixed:'tvs-mixed',hard:'tvs-hard'};
+
+function renderResults(d) {
+  // Score ring calculation
+  const score = d.overallScore || 7.5;
+  const ringColor = score >= 8 ? 'green' : score >= 6 ? 'amber' : 'red';
+  const ringOffset = Math.round(345 - (score / 10) * 345);
+
+  // Hero
+  const heroHtml = `
+    <div class="score-hero">
+      <div class="score-ring-wrap">
+        <svg class="score-ring-svg" viewBox="0 0 130 130">
+          <circle class="ring-bg" cx="65" cy="65" r="55"/>
+          <circle class="ring-fill ${ringColor}" cx="65" cy="65" r="55" id="ringFill" style="stroke-dashoffset:345"/>
+        </svg>
+        <div class="score-ring-num">
+          <div class="srn-num">${score.toFixed(1)}</div>
+          <div class="srn-label">/ 10</div>
+        </div>
+      </div>
+      <div class="score-info">
+        <div class="si-dest">${d.country || ''} · Solo Score</div>
+        <div class="si-title">${d.destination}</div>
+        <span class="si-verdict ${VERDICT_CLASS[d.verdictKey]||'verdict-good'}">${d.verdictLabel||'Good for Solo Travel'}</span>
+        <div class="si-summary">${d.summary||''}</div>
+      </div>
+    </div>`;
+
+  // Quick stats
+  const qs = d.quickStats || {};
+  const statsHtml = `
+    <div class="quick-stats">
+      <div class="qs-cell"><div class="qs-label">Avg Daily Cost</div><div class="qs-val">${qs.avgDailyCost||'—'}</div></div>
+      <div class="qs-cell"><div class="qs-label">English Access</div><div class="qs-val">${qs.englishLevel||'—'}</div></div>
+      <div class="qs-cell"><div class="qs-label">Solo Rating</div><div class="qs-val good">${qs.soloRating||'—'}</div></div>
+      <div class="qs-cell"><div class="qs-label">Best For</div><div class="qs-val">${qs.topFor||'—'}</div></div>
+    </div>`;
+
+  // Category score cards
+  const categoryHtml = (d.categories||[]).map((cat, i) => {
+    const cc = COLOR_MAP[cat.colorKey] || COLOR_MAP.good;
+    const fillPct = Math.round((cat.score / 10) * 100);
+    return `
+    <div class="score-card" style="animation-delay:${i*0.06}s">
+      <div class="sc-top">
+        <div class="sc-icon" style="background:${cat.bgColor||'#F5ECD8'}">${cat.icon}</div>
+        <div class="sc-name">${cat.name}</div>
+        <div class="sc-score-num ${cc.num}">${cat.score.toFixed(1)}</div>
+      </div>
+      <div class="sc-bar"><div class="sc-fill ${cc.fill}" style="width:0%" data-width="${fillPct}%"></div></div>
+      <div class="sc-desc">${cat.description}</div>
+      <div class="sc-tags">${(cat.tags||[]).map(t=>`<span class="sc-tag">${t}</span>`).join('')}</div>
+    </div>`;
+  }).join('');
+
+  // Traveler verdicts
+  const tvHtml = (d.travelerVerdicts||[]).map(tv => `
+    <div class="tv-item">
+      <span class="tv-icon">${tv.icon}</span>
+      <div class="tv-type">${tv.type}</div>
+      <span class="tv-score ${TV_SCORE_CLASS[tv.scoreKey]||'tvs-good'}">${tv.scoreLabel}</span>
+      <div class="tv-note">${tv.note}</div>
+    </div>`).join('');
+
+  // Months
+  const monthsHtml = (d.months||[]).map(m => {
+    const cls = m.best ? 'best' : m.avoid ? 'avoid' : '';
+    const numCls = m.score >= 8 ? 's-great' : m.score >= 6 ? 's-good' : 's-avoid';
+    return `
+    <div class="month-chip ${cls}">
+      <div class="mc-name">${m.name}</div>
+      <div class="mc-score ${numCls}">${m.score.toFixed(1)}</div>
+      <div class="mc-icon">${m.icon||'☀'}</div>
+    </div>`;
+  }).join('');
+
+  // Nearby
+  const nearbyHtml = (d.nearbyAlternatives||[]).map(n => {
+    const nc = COLOR_MAP[n.scoreKey] || COLOR_MAP.good;
+    return `
+    <div class="nearby-card" onclick="document.getElementById('destInput').value='${n.dest}';scoreDestination()">
+      <div class="nc-dest">${n.dest}</div>
+      <div class="nc-score">
+        <span class="nc-badge ${TV_SCORE_CLASS[n.scoreKey]||'tvs-good'}">${n.score?.toFixed(1)||'—'} / 10</span>
+      </div>
+      <div class="nc-why">${n.why}</div>
+    </div>`;
+  }).join('');
+
+  // Insights
+  const insightHtml = (d.insights||[]).map((ins, i) => `
+    <div class="insight-item" style="animation-delay:${i*0.07}s">
+      <span class="ii-icon">${ins.icon||'💡'}</span>
+      <span>${ins.text}</span>
+    </div>`).join('');
+
+  document.getElementById('results').innerHTML = `
+    ${heroHtml}
+    ${statsHtml}
+
+    <div style="font-size:12px;font-weight:700;color:var(--bark4);text-transform:uppercase;letter-spacing:0.09em;margin-bottom:12px">Score Breakdown — 8 Dimensions</div>
+    <div class="breakdown-grid">${categoryHtml}</div>
+
+    <div class="traveler-verdicts">
+      <div class="tv-header">
+        <div class="tv-title">By Traveler Type</div>
+      </div>
+      <div class="tv-grid">${tvHtml}</div>
+    </div>
+
+    <div class="months-section">
+      <div class="ms-header">
+        <div class="ms-title">Best & Worst Months</div>
+      </div>
+      <div class="months-row">${monthsHtml}</div>
+    </div>
+
+    <div class="nearby-section">
+      <div class="nearby-title">Nearby Alternatives</div>
+      <div class="nearby-sub">Click any to score it instantly</div>
+      <div class="nearby-grid">${nearbyHtml}</div>
+    </div>
+
+    <div class="insights-section">
+      <div class="is-title">✦ Claude's Solo Insights</div>
+      <div class="insight-items">${insightHtml}</div>
+    </div>
+
+    <div style="text-align:center">
+      <span class="reset-link" onclick="resetForm()">← Score another destination</span>
+    </div>
+  `;
+
+  document.getElementById('results').classList.add('show');
+
+  // Animate score ring
+  setTimeout(() => {
+    const ring = document.getElementById('ringFill');
+    if (ring) ring.style.strokeDashoffset = ringOffset;
+  }, 100);
+
+  // Animate score bars
+  setTimeout(() => {
+    document.querySelectorAll('.sc-fill[data-width]').forEach(el => {
+      el.style.width = el.dataset.width;
+    });
+  }, 200);
+}
+
+function resetForm() {
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('emptyState').style.display = 'block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.getElementById('destInput').addEventListener('keydown', e => { if(e.key==='Enter') scoreDestination(); });
+</script>
+</body>
+</html>
