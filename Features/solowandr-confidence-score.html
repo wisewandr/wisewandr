@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SoloWandr — Confidence Score</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Recoleta:wght@400;500;700&family=Nunito:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --terra:#C4622D;--terra2:#D4794A;--terra3:#F2D0BF;--terra4:#FDF3EE;
+  --sand:#E8D5B8;--sand2:#F5ECD8;--sand3:#FAF6EE;--linen:#FBF8F2;
+  --bark:#2C1F14;--bark2:#4A3728;--bark3:#7A6050;--bark4:#B0A090;
+  --moss:#2A5028;--moss2:#3A7038;--moss3:#C0DCC0;--moss4:#EEF7EE;
+  --sky:#1A4870;--sky2:#2A6898;--sky3:#C0D8F0;--sky4:#EEF4FC;
+  --gold:#8A6018;--gold2:#B88828;--gold3:#F8E4A8;--gold4:#FFFAEE;
+  --rose:#8A1840;--rose2:#B83060;--rose3:#F4C0D0;--rose4:#FDF0F5;
+  --white:#FFFFFF;--r:14px;
+}
+
+body{
+  font-family:'Nunito',sans-serif;
+  background:var(--linen);color:var(--bark);
+  min-height:100vh;overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 50% 40% at 20% 10%,rgba(196,98,45,0.06) 0%,transparent 55%),
+    radial-gradient(ellipse 50% 50% at 80% 90%,rgba(42,80,40,0.05) 0%,transparent 55%);
+  pointer-events:none;z-index:0;
+}
+
+.app{position:relative;z-index:1;max-width:840px;margin:0 auto;padding:0 20px 60px}
+
+/* ── Header ── */
+header{
+  padding:24px 0 18px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;border-bottom:1px solid var(--sand);margin-bottom:28px;
+}
+.brand{display:flex;align-items:center;gap:8px}
+.brand-mark{width:30px;height:30px;border-radius:8px;background:var(--terra);display:flex;align-items:center;justify-content:center;font-size:15px}
+.brand-name{font-family:'Recoleta',serif;font-size:17px;font-weight:700;color:var(--bark)}
+.brand-name span{color:var(--terra)}
+.page-tag{background:var(--gold4);border:1px solid var(--gold3);color:var(--gold2);font-size:11px;font-weight:700;padding:4px 12px;border-radius:100px}
+
+/* ── Quiz card ── */
+.quiz-card{
+  background:var(--white);border-radius:22px;
+  border:1.5px solid var(--sand);padding:30px 32px;
+  margin-bottom:24px;
+  box-shadow:0 2px 16px rgba(44,31,20,0.05);
+}
+.qc-top{margin-bottom:24px}
+.qc-eyebrow{font-size:11px;font-weight:700;color:var(--terra);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px}
+.qc-title{font-family:'Recoleta',serif;font-size:26px;font-weight:700;color:var(--bark);letter-spacing:-0.5px;margin-bottom:8px}
+.qc-title em{color:var(--terra);font-style:italic}
+.qc-sub{font-size:14px;color:var(--bark3);line-height:1.65}
+
+/* Progress bar */
+.quiz-progress{
+  display:flex;align-items:center;gap:10px;margin-bottom:28px;
+}
+.qp-bar{flex:1;height:6px;background:var(--sand2);border-radius:3px;overflow:hidden}
+.qp-fill{height:100%;background:var(--terra);border-radius:3px;transition:width 0.4s ease}
+.qp-label{font-size:12px;font-weight:700;color:var(--bark4);white-space:nowrap}
+
+/* ── Step panels ── */
+.step-panel{display:none;animation:fadeStep 0.3s ease}
+.step-panel.active{display:block}
+@keyframes fadeStep{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.step-q{
+  font-family:'Recoleta',serif;font-size:20px;font-weight:700;
+  color:var(--bark);margin-bottom:20px;line-height:1.3;
+}
+.step-q em{color:var(--terra);font-style:italic}
+
+/* Option buttons */
+.options-grid{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.opt-btn{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 18px;border-radius:14px;
+  border:1.5px solid var(--sand);background:none;
+  font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;
+  color:var(--bark2);cursor:pointer;transition:all 0.15s;text-align:left;
+  width:100%;
+}
+.opt-btn:hover{border-color:var(--terra);background:var(--terra4);color:var(--terra)}
+.opt-btn.selected{border-color:var(--terra);background:var(--terra4);color:var(--terra);font-weight:700}
+.opt-btn.selected .opt-check{display:flex}
+.opt-icon{font-size:22px;flex-shrink:0;width:32px;text-align:center}
+.opt-text{flex:1}
+.opt-label{font-size:14px;font-weight:700;color:inherit;display:block;margin-bottom:1px}
+.opt-desc{font-size:12px;color:var(--bark3);font-weight:400}
+.opt-btn.selected .opt-desc{color:var(--terra);opacity:0.8}
+.opt-check{
+  width:22px;height:22px;border-radius:50%;background:var(--terra);
+  color:white;font-size:11px;font-weight:800;
+  display:none;align-items:center;justify-content:center;flex-shrink:0;
+}
+
+/* text input step */
+.step-input{
+  font-family:'Nunito',sans-serif;font-size:16px;color:var(--bark);
+  background:var(--linen);border:1.5px solid var(--sand);
+  border-radius:12px;padding:14px 18px;width:100%;outline:none;
+  transition:border-color 0.2s;margin-bottom:20px;
+}
+.step-input::placeholder{color:var(--bark4)}
+.step-input:focus{border-color:var(--terra);box-shadow:0 0 0 3px rgba(196,98,45,0.1);background:var(--white)}
+
+/* Checkbox multi-select */
+.checkbox-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:24px}
+@media(max-width:480px){.checkbox-grid{grid-template-columns:1fr}}
+.chk-btn{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 14px;border-radius:12px;
+  border:1.5px solid var(--sand);background:none;
+  font-family:'Nunito',sans-serif;font-size:13px;font-weight:600;
+  color:var(--bark2);cursor:pointer;transition:all 0.14s;text-align:left;
+}
+.chk-btn:hover{border-color:var(--terra3);background:var(--terra4)}
+.chk-btn.checked{border-color:var(--terra);background:var(--terra4);color:var(--terra)}
+.chk-icon{font-size:18px;flex-shrink:0}
+.chk-box{
+  width:18px;height:18px;border-radius:5px;
+  border:1.5px solid var(--sand);background:none;
+  margin-left:auto;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:10px;
+}
+.chk-btn.checked .chk-box{background:var(--terra);border-color:var(--terra);color:white}
+
+/* Step nav */
+.step-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.btn-next{
+  padding:13px 32px;border-radius:100px;border:none;
+  background:var(--terra);color:white;
+  font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;
+  cursor:pointer;transition:all 0.18s;
+  box-shadow:0 3px 14px rgba(196,98,45,0.25);
+}
+.btn-next:hover{background:var(--terra2);transform:translateY(-1px);box-shadow:0 5px 18px rgba(196,98,45,0.3)}
+.btn-next:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-back{
+  padding:13px 22px;border-radius:100px;
+  border:1.5px solid var(--sand);background:none;
+  font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;
+  color:var(--bark3);cursor:pointer;transition:all 0.15s;
+}
+.btn-back:hover{border-color:var(--bark3);color:var(--bark)}
+
+/* Loading */
+.loading-step{display:none;text-align:center;padding:40px 20px}
+.loading-step.show{display:block}
+.ls-dots{display:flex;justify-content:center;gap:8px;margin-bottom:18px}
+.ls-dot{
+  width:10px;height:10px;border-radius:50%;
+  animation:dotBounce 1.3s ease-in-out infinite;
+}
+.ls-dot:nth-child(1){background:var(--terra);animation-delay:0s}
+.ls-dot:nth-child(2){background:var(--terra2);animation-delay:0.18s}
+.ls-dot:nth-child(3){background:var(--terra3);animation-delay:0.36s}
+@keyframes dotBounce{0%,80%,100%{transform:translateY(0);opacity:0.5}40%{transform:translateY(-10px);opacity:1}}
+.ls-msg{font-family:'Recoleta',serif;font-size:18px;font-style:italic;color:var(--bark2)}
+
+.err-bar{font-size:13px;color:var(--terra);background:var(--terra4);border:1px solid var(--terra3);border-radius:9px;padding:10px 14px;margin-bottom:12px;display:none}
+.err-bar.show{display:block}
+
+/* ── RESULTS ── */
+#results{display:none}
+#results.show{display:block}
+
+/* Confidence meter hero */
+.conf-hero{
+  background:var(--white);border-radius:24px;
+  border:1.5px solid var(--sand);padding:30px 32px;
+  margin-bottom:20px;
+  box-shadow:0 2px 20px rgba(44,31,20,0.07);
+  animation:riseUp 0.4s ease both;
+}
+@keyframes riseUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.ch-top{display:flex;align-items:flex-start;gap:24px;flex-wrap:wrap;margin-bottom:24px}
+
+/* Confidence meter arc */
+.meter-wrap{flex-shrink:0;text-align:center;width:160px}
+.meter-svg{width:160px;height:100px;overflow:visible}
+.meter-track{fill:none;stroke:var(--sand2);stroke-width:14;stroke-linecap:round}
+.meter-fill{
+  fill:none;stroke-width:14;stroke-linecap:round;
+  stroke-dasharray:283;stroke-dashoffset:283;
+  transition:stroke-dashoffset 1.6s cubic-bezier(0.4,0,0.2,1) 0.4s;
+}
+.meter-label{margin-top:8px}
+.ml-score{font-family:'Recoleta',serif;font-size:40px;font-weight:700;line-height:1}
+.ml-verdict{font-size:13px;font-weight:700;margin-top:4px}
+
+.ch-text{flex:1;min-width:200px}
+.cht-dest{font-size:11px;font-weight:700;color:var(--bark4);text-transform:uppercase;letter-spacing:0.09em;margin-bottom:5px}
+.cht-headline{font-family:'Recoleta',serif;font-size:26px;font-weight:700;color:var(--bark);margin-bottom:10px;line-height:1.15}
+.cht-headline em{font-style:italic}
+.cht-summary{font-size:14px;color:var(--bark3);line-height:1.7;margin-bottom:16px}
+.cht-profile{
+  display:inline-flex;align-items:center;gap:7px;
+  background:var(--terra4);border:1px solid var(--terra3);
+  border-radius:100px;padding:6px 14px;
+  font-size:12px;font-weight:700;color:var(--terra);
+}
+
+/* Readiness bars */
+.readiness-grid{display:flex;flex-direction:column;gap:10px}
+.rb-item{display:flex;align-items:center;gap:12px}
+.rb-label{font-size:13px;font-weight:700;color:var(--bark2);min-width:130px}
+.rb-track{flex:1;height:8px;background:var(--linen);border-radius:4px;overflow:hidden}
+.rb-fill{height:100%;border-radius:4px;transition:width 1.3s cubic-bezier(0.4,0,0.2,1) 0.6s;width:0}
+.rb-score{font-size:12px;font-weight:700;color:var(--bark3);min-width:32px;text-align:right}
+
+/* Challenge cards */
+.challenges-section{margin-bottom:20px;animation:riseUp 0.4s ease 0.08s both}
+.cs-title{font-family:'Recoleta',serif;font-size:19px;font-weight:700;color:var(--bark);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.challenges-grid{display:flex;flex-direction:column;gap:10px}
+
+.challenge-item{
+  background:var(--white);border:1.5px solid var(--sand);
+  border-radius:14px;padding:16px 18px;
+  display:flex;gap:14px;align-items:flex-start;
+  animation:riseUp 0.4s ease both;
+  transition:all 0.18s;
+}
+.challenge-item:hover{border-color:var(--terra3);box-shadow:0 4px 14px rgba(44,31,20,0.06)}
+
+.ci-level{
+  width:36px;height:36px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  flex-shrink:0;
+}
+.level-easy{background:var(--moss4)}
+.level-medium{background:var(--gold4)}
+.level-tricky{background:var(--terra4)}
+
+.ci-content{flex:1}
+.ci-title{font-size:14px;font-weight:800;color:var(--bark);margin-bottom:3px}
+.ci-desc{font-size:13px;color:var(--bark3);line-height:1.6;margin-bottom:8px}
+.ci-tips{display:flex;flex-direction:column;gap:4px}
+.ci-tip{
+  font-size:12px;color:var(--bark2);line-height:1.5;
+  display:flex;gap:6px;
+}
+.ci-tip-bullet{color:var(--terra);font-weight:800;flex-shrink:0}
+
+.ci-badge{
+  font-size:10px;font-weight:800;padding:3px 10px;border-radius:100px;
+  flex-shrink:0;margin-top:3px;
+  text-transform:uppercase;letter-spacing:0.06em;
+}
+.badge-easy{background:var(--moss4);color:var(--moss2)}
+.badge-medium{background:var(--gold4);color:var(--gold2)}
+.badge-tricky{background:var(--terra4);color:var(--terra)}
+
+/* Suggested stepping stones */
+.stepping-section{
+  background:var(--moss4);border:1.5px solid var(--moss3);
+  border-radius:18px;padding:20px 22px;margin-bottom:20px;
+  animation:riseUp 0.4s ease 0.12s both;
+}
+.ss-title{font-family:'Recoleta',serif;font-size:18px;font-weight:700;color:var(--moss);margin-bottom:6px}
+.ss-sub{font-size:13px;color:var(--bark3);margin-bottom:16px}
+.stepping-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.step-dest{
+  background:var(--white);border-radius:12px;padding:14px 16px;
+  border:1.5px solid var(--moss3);cursor:pointer;transition:all 0.15s;
+}
+.step-dest:hover{border-color:var(--moss2);transform:translateY(-1px)}
+.sd-name{font-size:14px;font-weight:800;color:var(--bark);margin-bottom:3px}
+.sd-score{
+  font-size:12px;font-weight:700;padding:2px 9px;border-radius:100px;
+  background:var(--moss4);color:var(--moss2);display:inline-block;margin-bottom:5px;
+}
+.sd-why{font-size:12px;color:var(--bark3);line-height:1.5}
+
+/* Encouragement section */
+.enc-section{
+  background:var(--terra);border-radius:20px;padding:26px 28px;
+  margin-bottom:20px;color:white;text-align:center;
+  animation:riseUp 0.4s ease 0.16s both;
+  position:relative;overflow:hidden;
+}
+.enc-section::before{
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:180px;height:180px;border-radius:50%;
+  background:rgba(255,255,255,0.06);pointer-events:none;
+}
+.enc-inner{position:relative;z-index:1}
+.enc-icon{font-size:44px;margin-bottom:12px;display:block}
+.enc-title{font-family:'Recoleta',serif;font-size:24px;font-weight:700;margin-bottom:8px;line-height:1.15}
+.enc-text{font-size:14px;opacity:0.85;line-height:1.7;max-width:480px;margin:0 auto 20px}
+.enc-btn{
+  padding:13px 30px;border-radius:100px;border:none;
+  background:white;color:var(--terra);
+  font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;
+  cursor:pointer;transition:all 0.18s;
+}
+.enc-btn:hover{background:var(--linen);transform:translateY(-1px)}
+
+/* Packing tips for first-timers */
+.tips-section{
+  background:var(--white);border:1.5px solid var(--sand);
+  border-radius:18px;padding:20px 22px;margin-bottom:20px;
+  animation:riseUp 0.4s ease 0.18s both;
+}
+.ts-title{font-family:'Recoleta',serif;font-size:18px;font-weight:700;color:var(--bark);margin-bottom:14px}
+.first-timer-tips{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:540px){.first-timer-tips{grid-template-columns:1fr}}
+.ftt-card{
+  background:var(--linen);border-radius:12px;padding:14px 16px;
+  border-left:3px solid var(--terra);
+}
+.ftt-title{font-size:13px;font-weight:800;color:var(--bark);margin-bottom:5px;display:flex;align-items:center;gap:6px}
+.ftt-text{font-size:12px;color:var(--bark3);line-height:1.6}
+
+/* share strip */
+.share-strip{
+  display:flex;gap:10px;flex-wrap:wrap;
+}
+.share-btn{
+  flex:1;padding:12px;border-radius:12px;
+  font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;
+  cursor:pointer;transition:all 0.15s;
+  display:flex;align-items:center;justify-content:center;gap:7px;border:none;
+}
+.sb-primary{background:var(--terra);color:white}
+.sb-primary:hover{background:var(--terra2)}
+.sb-secondary{background:var(--white);color:var(--bark2);border:1.5px solid var(--sand)}
+.sb-secondary:hover{border-color:var(--bark3);color:var(--bark)}
+
+.reset-link{font-size:13px;color:var(--bark4);cursor:pointer;text-decoration:underline;display:block;text-align:center;margin-top:14px;transition:color 0.15s}
+.reset-link:hover{color:var(--terra)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="brand">
+      <div class="brand-mark">🧳</div>
+      <div class="brand-name">Solo<span>Wandr</span></div>
+    </div>
+    <div class="page-tag">⭐ Confidence Score</div>
+  </header>
+
+  <!-- ── Quiz Card ── -->
+  <div class="quiz-card" id="quizCard">
+    <div class="qc-top">
+      <div class="qc-eyebrow">For first-time solo travelers</div>
+      <div class="qc-title">Is <em>this destination</em><br>right for you?</div>
+      <div class="qc-sub">Answer 6 quick questions. Claude will tell you honestly how challenging this destination is for your experience level — with specific tips to make it work.</div>
+    </div>
+
+    <div class="quiz-progress">
+      <div class="qp-bar"><div class="qp-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="qp-label" id="progressLabel">Step 1 of 6</div>
+    </div>
+
+    <div class="err-bar" id="errBar"></div>
+
+    <!-- Step 1: Destination -->
+    <div class="step-panel active" id="step1">
+      <div class="step-q">Where are you thinking of going?</div>
+      <input class="step-input" type="text" id="s1dest" placeholder="e.g. Japan, Morocco, Colombia, Bali…" />
+      <div class="step-nav">
+        <div></div>
+        <button class="btn-next" onclick="nextStep(1)">Next →</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Experience level -->
+    <div class="step-panel" id="step2">
+      <div class="step-q">How much solo travel experience do you have?</div>
+      <div class="options-grid">
+        <button class="opt-btn" data-val="complete beginner" onclick="selectOpt(this,'s2')">
+          <span class="opt-icon">🌱</span>
+          <div class="opt-text"><span class="opt-label">Complete beginner</span><span class="opt-desc">This would be my very first trip alone</span></div>
+          <span class="opt-check">✓</span>
+        </button>
+        <button class="opt-btn" data-val="some experience" onclick="selectOpt(this,'s2')">
+          <span class="opt-icon">🌿</span>
+          <div class="opt-text"><span class="opt-label">A little experience</span><span class="opt-desc">I've done a solo trip or two in easy destinations</span></div>
+          <span class="opt-check">✓</span>
+        </button>
+        <button class="opt-btn" data-val="moderate experience" onclick="selectOpt(this,'s2')">
+          <span class="opt-icon">🌳</span>
+          <div class="opt-text"><span class="opt-label">Moderately experienced</span><span class="opt-desc">I've done several solo trips across different countries</span></div>
+          <span class="opt-check">✓</span>
+        </button>
+        <button class="opt-btn" data-val="very experienced" onclick="selectOpt(this,'s2')">
+          <span class="opt-icon">🗺</span>
+          <div class="opt-text"><span class="opt-label">Very experienced</span><span class="opt-desc">I travel solo regularly and love challenging destinations</span></div>
+          <span class="opt-check">✓</span>
+        </button>
+      </div>
+      <div class="step-nav">
+        <button class="btn-back" onclick="prevStep(2)">← Back</button>
+        <button class="btn-next" id="next2" onclick="nextStep(2)" disabled>Next →</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Main concern -->
+    <div class="step-panel" id="step3">
+      <div class="step-q">What worries you <em>most</em> about this trip?</div>
+      <div class="options-grid">
+        <button class="opt-btn" data-val="safety" onclick="selectOpt(this,'s3')">
+          <span class="opt-icon">🛡</span>
+          <div class="opt-text"><span class="opt-label">Personal safety</span><span class="opt-desc">I worry about being unsafe or targeted as a solo traveler</span></div>
+          <span class="opt-check">✓</span>
+        </button>
+        <button class="opt-btn" data-val="language barrier" onclick="selectOpt(this,'s3')">
+          <span class="opt-icon">💬</span>
+          <div class="opt-text"><span class="opt-label">Language barrier</span><span class="opt-desc">Not speaking the language makes me nervous</span></div>
+          <span class="opt-check">✓</span>
+        </button>
+        <button class="opt-btn" data-val="getting lost" onclick="selectOpt(this,'s3')">
+          <span class="opt-icon">🗺</span>
+          <div class="opt-text"><span class="opt-label">Getting lost or confused</span><span class="opt-desc">Navigating alone in an unfamiliar place feels overwhelming</span></div>
+          <span class="opt-check">✓</span>
+        </button>
+        <button class="opt-btn" data-val="loneliness" onclick="selectOpt(this,'s3')">
+          <span class="opt-icon">😶</span>
+          <div class="opt-text"><span class="opt-label">Loneliness</span><span class="opt-desc">I worry I'll feel isolated or wish I had company</span></div>
+          <span class="opt-check">✓</span>
+        </button>
+        <button class="opt-btn" data-val="budget and scams" onclick="selectOpt(this,'s3')">
+          <span class="opt-icon">💰</span>
+          <div class="opt-text"><span class="opt-label">Budget & being scammed</span><span class="opt-desc">Managing money and not getting ripped off alone</span></div>
+          <span class="opt-check">✓</span>
+        </button>
+        <button class="opt-btn" data-val="cultural differences" onclick="selectOpt(this,'s3')">
+          <span class="opt-icon">🌍</span>
+          <div class="opt-text"><span class="opt-label">Cultural differences</span><span class="opt-desc">Not knowing customs, dress codes, or etiquette</span></div>
+          <span class="opt-check">✓</span>
+        </button>
+      </div>
+      <div class="step-nav">
+        <button class="btn-back" onclick="prevStep(3)">← Back</button>
+        <button class="btn-next" id="next3" onclick="nextStep(3)" disabled>Next →</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Travel style -->
+    <div class="step-panel" id="step4">
+      <div class="step-q">How do you like to travel?</div>
+      <div class="options-grid">
+        <button class="opt-btn" data-val="budget backpacker hostels" onclick="selectOpt(this,'s4')">
+          <span class="opt-icon">🎒</span>
+          <div class="opt-text"><span class="opt-label">Budget backpacker</span><span class="opt-desc">Hostels, street food, local buses — I love the adventure</span></div>
+          <span class="opt-check">✓</span>
+        </button>
+        <button class="opt-btn" data-val="comfortable mid-range" onclick="selectOpt(this,'s4')">
+          <span class="opt-icon">🏨</span>
+          <div class="opt-text"><span class="opt-label">Comfortable mid-range</span><span class="opt-desc">I want a nice room and good food without roughing it</span></div>
+          <span class="opt-check">✓</span>
+        </button>
+        <button class="opt-btn" data-val="organized tours and structure" onclick="selectOpt(this,'s4')">
+          <span class="opt-icon">📋</span>
+          <div class="opt-text"><span class="opt-label">Organized with some structure</span><span class="opt-desc">I prefer guided tours and planned activities for security</span></div>
+          <span class="opt-check">✓</span>
+        </button>
+        <button class="opt-btn" data-val="luxury and comfort" onclick="selectOpt(this,'s4')">
+          <span class="opt-icon">✨</span>
+          <div class="opt-text"><span class="opt-label">Luxury and comfort</span><span class="opt-desc">Hotels with good service take away a lot of the stress</span></div>
+          <span class="opt-check">✓</span>
+        </button>
+      </div>
+      <div class="step-nav">
+        <button class="btn-back" onclick="prevStep(4)">← Back</button>
+        <button class="btn-next" id="next4" onclick="nextStep(4)" disabled>Next →</button>
+      </div>
+    </div>
+
+    <!-- Step 5: What excites you -->
+    <div class="step-panel" id="step5">
+      <div class="step-q">What excites you most about going solo?</div>
+      <div class="checkbox-grid" id="excitedGrid">
+        <button class="chk-btn" data-e="total freedom"><span class="chk-icon">🦅</span>Total freedom<div class="chk-box"></div></button>
+        <button class="chk-btn" data-e="meeting new people"><span class="chk-icon">🤝</span>Meeting new people<div class="chk-box"></div></button>
+        <button class="chk-btn" data-e="proving I can do it"><span class="chk-icon">💪</span>Proving I can do it<div class="chk-box"></div></button>
+        <button class="chk-btn" data-e="going at my own pace"><span class="chk-icon">⏰</span>Going at my own pace<div class="chk-box"></div></button>
+        <button class="chk-btn" data-e="self-discovery"><span class="chk-icon">🌱</span>Self-discovery<div class="chk-box"></div></button>
+        <button class="chk-btn" data-e="the thrill of the unknown"><span class="chk-icon">✨</span>The thrill of unknown<div class="chk-box"></div></button>
+      </div>
+      <div class="step-nav">
+        <button class="btn-back" onclick="prevStep(5)">← Back</button>
+        <button class="btn-next" onclick="nextStep(5)">Get My Score →</button>
+      </div>
+    </div>
+
+    <!-- Loading step -->
+    <div class="loading-step" id="loadingStep">
+      <div class="ls-dots"><div class="ls-dot"></div><div class="ls-dot"></div><div class="ls-dot"></div></div>
+      <div class="ls-msg" id="loadingMsg">Calculating your confidence score…</div>
+    </div>
+
+  </div>
+
+  <!-- ── RESULTS ── -->
+  <div id="results">
+
+    <!-- Confidence meter -->
+    <div class="conf-hero" id="confHero">
+      <div class="ch-top">
+        <div class="meter-wrap">
+          <svg class="meter-svg" viewBox="0 0 160 100">
+            <path class="meter-track" d="M 20 90 A 60 60 0 1 1 140 90" fill="none"/>
+            <path class="meter-fill" id="meterFill" d="M 20 90 A 60 60 0 1 1 140 90" fill="none" stroke="#C4622D"/>
+          </svg>
+          <div class="meter-label">
+            <div class="ml-score" id="meterScore" style="color:var(--terra)">—</div>
+            <div class="ml-verdict" id="meterVerdict" style="color:var(--bark4)">Calculating…</div>
+          </div>
+        </div>
+        <div class="ch-text">
+          <div class="cht-dest" id="chtDest">Your Destination</div>
+          <div class="cht-headline" id="chtHeadline">Your confidence score</div>
+          <div class="cht-summary" id="chtSummary"></div>
+          <div class="cht-profile" id="chtProfile"></div>
+        </div>
+      </div>
+
+      <!-- Readiness bars -->
+      <div style="font-size:11px;font-weight:700;color:var(--bark4);text-transform:uppercase;letter-spacing:0.09em;margin-bottom:12px">Readiness Breakdown</div>
+      <div class="readiness-grid" id="readinessGrid"></div>
+    </div>
+
+    <!-- Challenges -->
+    <div class="challenges-section" id="challengesSection">
+      <div class="cs-title">⚡ What to Prepare For</div>
+      <div class="challenges-grid" id="challengesGrid"></div>
+    </div>
+
+    <!-- Stepping stones -->
+    <div class="stepping-section" id="steppingSection">
+      <div class="ss-title">🪜 Easier Starting Points</div>
+      <div class="ss-sub">If this feels like a stretch, try one of these first — then come back to your dream destination with more confidence.</div>
+      <div class="stepping-grid" id="steppingGrid"></div>
+    </div>
+
+    <!-- Encouragement -->
+    <div class="enc-section" id="encSection">
+      <div class="enc-inner">
+        <span class="enc-icon" id="encIcon">🌍</span>
+        <div class="enc-title" id="encTitle">You've got this.</div>
+        <div class="enc-text" id="encText"></div>
+        <button class="enc-btn" onclick="alert('Opening Trip Planner...\n\nIn the full app this opens the Budget Planner and Solo Travel Guide for your chosen destination.')">Start Planning This Trip →</button>
+      </div>
+    </div>
+
+    <!-- First-timer tips -->
+    <div class="tips-section">
+      <div class="ts-title">📋 First-Timer Essentials</div>
+      <div class="first-timer-tips" id="firstTimerTips"></div>
+    </div>
+
+    <!-- Share -->
+    <div class="share-strip" style="margin-bottom:16px">
+      <button class="share-btn sb-primary" onclick="alert('📤 Sharing your confidence score!\n\nIn the full app you can share this as an image to inspire others or post to the SoloWandr community.')">📤 Share My Score</button>
+      <button class="share-btn sb-secondary" onclick="alert('🌍 Opening Destination Finder...\n\nSee the full solo score for this destination across all 8 dimensions.')">See Full Destination Score →</button>
+    </div>
+    <span class="reset-link" onclick="resetQuiz()">← Score a different destination</span>
+  </div>
+
+</div>
+
+<script>
+const answers = {};
+let currentStep = 1;
+const TOTAL_STEPS = 5;
+const LOAD_MSGS = [
+  'Calculating your confidence score…',
+  'Matching your profile to the destination…',
+  'Building your preparation plan…',
+  'Writing your encouragement…',
+  'Almost there…'
+];
+let ldInt;
+
+// ── Quiz navigation ──
+function updateProgress(step) {
+  const pct = Math.round(((step-1) / TOTAL_STEPS) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `Step ${step} of ${TOTAL_STEPS}`;
+}
+
+function selectOpt(btn, group) {
+  document.querySelectorAll(`#step${group.slice(1)} .opt-btn`).forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  answers[group] = btn.dataset.val;
+  const nextId = 'next' + group.slice(1);
+  const nextBtn = document.getElementById(nextId);
+  if (nextBtn) nextBtn.disabled = false;
+}
+
+document.querySelectorAll('.chk-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    btn.classList.toggle('checked');
+    const box = btn.querySelector('.chk-box');
+    if (btn.classList.contains('checked')) {
+      box.textContent = '✓';
+      const excitements = answers.s5 ? answers.s5.split(',') : [];
+      excitements.push(btn.dataset.e);
+      answers.s5 = excitements.join(',');
+    } else {
+      box.textContent = '';
+      const excitements = answers.s5 ? answers.s5.split(',').filter(e=>e!==btn.dataset.e) : [];
+      answers.s5 = excitements.join(',');
+    }
+  });
+});
+
+function nextStep(from) {
+  if (from === 1) {
+    const dest = document.getElementById('s1dest').value.trim();
+    if (!dest) {
+      document.getElementById('errBar').textContent = '⚠ Please enter your destination.';
+      document.getElementById('errBar').classList.add('show'); return;
+    }
+    document.getElementById('errBar').classList.remove('show');
+    answers.s1 = dest;
+  }
+  if (from === TOTAL_STEPS) { startAnalysis(); return; }
+  document.getElementById(`step${from}`).classList.remove('active');
+  document.getElementById(`step${from+1}`).classList.add('active');
+  currentStep = from + 1;
+  updateProgress(currentStep);
+}
+
+function prevStep(from) {
+  document.getElementById(`step${from}`).classList.remove('active');
+  document.getElementById(`step${from-1}`).classList.add('active');
+  currentStep = from - 1;
+  updateProgress(currentStep);
+}
+
+async function startAnalysis() {
+  // Hide all steps, show loading
+  for(let i=1;i<=TOTAL_STEPS;i++) document.getElementById(`step${i}`).classList.remove('active');
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressLabel').textContent = 'Calculating…';
+  document.getElementById('loadingStep').classList.add('show');
+  let li = 0;
+  document.getElementById('loadingMsg').textContent = LOAD_MSGS[0];
+  ldInt = setInterval(()=>{li=(li+1)%LOAD_MSGS.length;document.getElementById('loadingMsg').textContent=LOAD_MSGS[li]},1600);
+
+  const dest = answers.s1;
+  const exp  = answers.s2 || 'complete beginner';
+  const worry = answers.s3 || 'safety';
+  const style = answers.s4 || 'comfortable mid-range';
+  const excites = answers.s5 || 'total freedom';
+
+  const prompt = `You are SoloWandr's confidence coach for first-time solo travelers. Assess how ready this person is for their chosen destination.
+
+Destination: ${dest}
+Solo travel experience: ${exp}
+Biggest worry: ${worry}
+Travel style: ${style}
+What excites them: ${excites}
+
+Be encouraging, honest, and specific. Celebrate their courage. Respond ONLY with valid JSON (no markdown, no backticks):
+{
+  "destination": "${dest}",
+  "confidenceScore": 78,
+  "verdictLabel": "Ready with Prep",
+  "verdictKey": "ready",
+  "headline": "Inspiring one-liner headline — e.g. 'Japan is calling — and you're closer than you think'",
+  "summary": "2-3 sentences: honest assessment of their readiness, acknowledging their specific experience level and worry, with genuine encouragement",
+  "travelerProfile": "Brief label e.g. 'Curious first-timer · Comfort seeker · Culture lover'",
+  "readiness": [
+    {"label": "Safety Readiness", "score": 80, "colorHex": "#3A7038"},
+    {"label": "Navigation Skills", "score": 65, "colorHex": "#B88828"},
+    {"label": "Cultural Awareness", "score": 72, "colorHex": "#3A7038"},
+    {"label": "Budget Confidence", "score": 85, "colorHex": "#3A7038"},
+    {"label": "Social Comfort", "score": 60, "colorHex": "#B88828"}
+  ],
+  "challenges": [
+    {
+      "title": "Specific challenge for ${dest} relevant to ${worry}",
+      "level": "medium",
+      "levelLabel": "Manageable",
+      "icon": "🗺",
+      "description": "Honest 1-2 sentence description of why this is a challenge for ${exp} travelers in ${dest}",
+      "tips": ["Specific practical tip 1", "Specific practical tip 2"]
+    },
+    {
+      "title": "Another challenge specific to ${dest} or ${style}",
+      "level": "easy",
+      "levelLabel": "Easy to Handle",
+      "icon": "💬",
+      "description": "Description",
+      "tips": ["Tip 1", "Tip 2"]
+    },
+    {
+      "title": "Third challenge — most relevant to their concerns",
+      "level": "tricky",
+      "levelLabel": "Plan Ahead",
+      "icon": "⚡",
+      "description": "Description",
+      "tips": ["Tip 1", "Tip 2", "Tip 3"]
+    }
+  ],
+  "steppingStones": [
+    {"dest": "Easier destination 1", "score": "91/100", "why": "Why this is a perfect starter for this traveler's style"},
+    {"dest": "Easier destination 2", "score": "88/100", "why": "Why this suits their comfort level"},
+    {"dest": "Similar vibe, easier", "score": "85/100", "why": "Same atmosphere, lower difficulty"}
+  ],
+  "encouragement": {
+    "icon": "🌏",
+    "title": "Warm, specific encouragement title",
+    "text": "2-3 sentences of genuine encouragement referencing their specific excitement (${excites}) and the destination. Make them feel the trip is achievable and life-changing."
+  },
+  "firstTimerTips": [
+    {"icon": "📱", "title": "Download before you go", "text": "Specific apps to download for ${dest} — maps, translation, transport"},
+    {"icon": "🏨", "title": "Where to stay first night", "text": "Accommodation advice for the first night specifically in ${dest}"},
+    {"icon": "💬", "title": "Handling the language", "text": "Language-specific advice for ${dest}"},
+    {"icon": "🆘", "title": "If something goes wrong", "text": "Who to call and what to do in ${dest} specifically"},
+    {"icon": "🤝", "title": "Meeting other travelers", "text": "Best places to meet people in ${dest} given ${style} travel style"},
+    {"icon": "💰", "title": "Money basics", "text": "Currency, tipping, and budget tips specific to ${dest}"}
+  ]
+}
+
+verdictKey options: "ready" (70+), "almost" (50-69), "stretch" (30-49), "prep-more" (below 30).
+Make ALL advice specific to ${dest} — never generic. confidenceScore accounts for their experience level.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514', max_tokens:1000,
+        messages:[{role:'user', content:prompt}]
+      })
+    });
+    const data = await res.json();
+    const text = data.content.map(b=>b.text||'').join('');
+    const clean = text.replace(/```json|```/g,'').trim();
+    const result = JSON.parse(clean);
+
+    clearInterval(ldInt);
+    document.getElementById('loadingStep').classList.remove('show');
+    document.getElementById('quizCard').style.display = 'none';
+    renderResults(result);
+
+  } catch(err) {
+    clearInterval(ldInt);
+    document.getElementById('loadingStep').classList.remove('show');
+    for(let i=1;i<=TOTAL_STEPS;i++) document.getElementById(`step${i}`).classList.remove('active');
+    document.getElementById(`step${TOTAL_STEPS}`).classList.add('active');
+    document.getElementById('errBar').textContent = '⚠ Could not calculate score. Please try again.';
+    document.getElementById('errBar').classList.add('show');
+    console.error(err);
+  }
+}
+
+const VERDICT_COLORS = {
+  ready:{score:'var(--moss2)',meter:'#3A7038'},
+  almost:{score:'var(--gold2)',meter:'#B88828'},
+  stretch:{score:'var(--terra)',meter:'#C4622D'},
+  'prep-more':{score:'var(--rose2)',meter:'#B83060'},
+};
+
+function renderResults(d) {
+  // Confidence meter
+  const score = d.confidenceScore || 75;
+  const vc = VERDICT_COLORS[d.verdictKey] || VERDICT_COLORS.almost;
+  document.getElementById('meterScore').textContent = score;
+  document.getElementById('meterScore').style.color = vc.score;
+  document.getElementById('meterVerdict').textContent = d.verdictLabel || 'Ready with Prep';
+  document.getElementById('meterFill').style.stroke = vc.meter;
+
+  // Animate arc (semi-circle = 283 dasharray)
+  const offset = Math.round(283 - (score/100)*283);
+  setTimeout(() => { document.getElementById('meterFill').style.strokeDashoffset = offset; }, 100);
+
+  document.getElementById('chtDest').textContent = d.destination + ' · Confidence Score';
+  document.getElementById('chtHeadline').innerHTML = d.headline || 'Your confidence score';
+  document.getElementById('chtSummary').textContent = d.summary || '';
+  document.getElementById('chtProfile').innerHTML = '✦ ' + (d.travelerProfile || 'First-time solo traveler');
+
+  // Readiness bars
+  document.getElementById('readinessGrid').innerHTML = (d.readiness||[]).map((r,i) => `
+    <div class="rb-item" style="animation-delay:${i*0.06}s">
+      <span class="rb-label">${r.label}</span>
+      <div class="rb-track"><div class="rb-fill" style="background:${r.colorHex}" data-w="${r.score}%"></div></div>
+      <span class="rb-score">${r.score}%</span>
+    </div>`).join('');
+  setTimeout(()=>document.querySelectorAll('.rb-fill[data-w]').forEach(el=>el.style.width=el.dataset.w), 200);
+
+  // Challenges
+  const levelClass = {easy:'level-easy',medium:'level-medium',tricky:'level-tricky'};
+  const badgeClass = {easy:'badge-easy',medium:'badge-medium',tricky:'badge-tricky'};
+  document.getElementById('challengesGrid').innerHTML = (d.challenges||[]).map((c,i)=>`
+    <div class="challenge-item" style="animation-delay:${i*0.07}s">
+      <div class="ci-level ${levelClass[c.level]||'level-medium'}">${c.icon||'⚡'}</div>
+      <div class="ci-content">
+        <div class="ci-title">${c.title}</div>
+        <div class="ci-desc">${c.description}</div>
+        <div class="ci-tips">
+          ${(c.tips||[]).map(t=>`<div class="ci-tip"><span class="ci-tip-bullet">→</span><span>${t}</span></div>`).join('')}
+        </div>
+      </div>
+      <span class="ci-badge ${badgeClass[c.level]||'badge-medium'}">${c.levelLabel||c.level}</span>
+    </div>`).join('');
+
+  // Stepping stones
+  document.getElementById('steppingGrid').innerHTML = (d.steppingStones||[]).map(s=>`
+    <div class="step-dest">
+      <div class="sd-name">${s.dest}</div>
+      <span class="sd-score">${s.score} confidence</span>
+      <div class="sd-why">${s.why}</div>
+    </div>`).join('');
+
+  // Encouragement
+  const enc = d.encouragement || {};
+  document.getElementById('encIcon').textContent = enc.icon || '🌏';
+  document.getElementById('encTitle').textContent = enc.title || 'You\'ve got this.';
+  document.getElementById('encText').textContent = enc.text || '';
+
+  // First-timer tips
+  document.getElementById('firstTimerTips').innerHTML = (d.firstTimerTips||[]).map(t=>`
+    <div class="ftt-card">
+      <div class="ftt-title">${t.icon} ${t.title}</div>
+      <div class="ftt-text">${t.text}</div>
+    </div>`).join('');
+
+  document.getElementById('results').classList.add('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function resetQuiz() {
+  answers.s1 = answers.s2 = answers.s3 = answers.s4 = answers.s5 = undefined;
+  currentStep = 1;
+  for(let i=1;i<=TOTAL_STEPS;i++) document.getElementById(`step${i}`).classList.remove('active');
+  document.getElementById('step1').classList.add('active');
+  document.getElementById('s1dest').value = '';
+  document.querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('selected'));
+  document.querySelectorAll('.chk-btn').forEach(b=>{b.classList.remove('checked');b.querySelector('.chk-box').textContent=''});
+  ['next2','next3','next4'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=true});
+  updateProgress(1);
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('quizCard').style.display = 'block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+updateProgress(1);
+</script>
+</body>
+</html>

@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SoloWandr — Single Supplement Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Recoleta:wght@400;500;700&family=Nunito:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --terra:#C4622D;--terra2:#D4794A;--terra3:#F2D0BF;--terra4:#FDF3EE;
+  --sand:#E8D5B8;--sand2:#F5ECD8;--sand3:#FAF6EE;--linen:#FBF8F2;
+  --bark:#2C1F14;--bark2:#4A3728;--bark3:#7A6050;--bark4:#B0A090;
+  --moss:#2A5028;--moss2:#3A7038;--moss3:#C0DCC0;--moss4:#EEF7EE;
+  --red:#8A1818;--red2:#C02828;--red3:#FAD0D0;--red4:#FFF4F4;
+  --gold:#8A6018;--gold2:#B88828;--gold3:#F8E4A8;--gold4:#FFFAEE;
+  --sky:#1A4870;--sky2:#2A6898;--sky3:#C0D8F0;--sky4:#EEF4FC;
+  --white:#FFFFFF;--r:14px;--nav-h:64px;
+  --mono:'DM Mono',monospace;
+}
+
+body{
+  font-family:'Nunito',sans-serif;
+  background:var(--linen);color:var(--bark);
+  min-height:100vh;overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse 60% 45% at 75% 10%,rgba(192,40,40,0.04) 0%,transparent 55%),
+             radial-gradient(ellipse 50% 50% at 20% 90%,rgba(42,80,40,0.04) 0%,transparent 55%);
+  pointer-events:none;z-index:0;
+}
+
+.app{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:0 20px calc(var(--nav-h)+28px)}
+
+/* ── Header ── */
+header{padding:24px 0 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--sand);margin-bottom:26px}
+.brand{display:flex;align-items:center;gap:8px}
+.brand-mark{width:30px;height:30px;border-radius:8px;background:var(--terra);display:flex;align-items:center;justify-content:center;font-size:15px}
+.brand-name{font-family:'Recoleta',serif;font-size:17px;font-weight:700;color:var(--bark)}
+.brand-name span{color:var(--terra)}
+.page-tag{background:var(--red4);border:1px solid var(--red3);color:var(--red2);font-size:11px;font-weight:700;padding:4px 12px;border-radius:100px}
+
+/* ── Hero banner ── */
+.injustice-banner{
+  background:var(--bark);border-radius:20px;padding:22px 26px;
+  margin-bottom:24px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;
+  position:relative;overflow:hidden;
+}
+.injustice-banner::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:rgba(192,40,40,0.1);pointer-events:none}
+.ib-inner{flex:1;position:relative;z-index:1}
+.ib-eyebrow{font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.1em;font-weight:700;margin-bottom:5px}
+.ib-title{font-family:'Recoleta',serif;font-size:22px;font-weight:700;color:white;margin-bottom:7px;line-height:1.15}
+.ib-title em{color:var(--terra2);font-style:italic}
+.ib-sub{font-size:13px;color:rgba(255,255,255,0.65);line-height:1.65;max-width:500px}
+.ib-stat{
+  flex-shrink:0;text-align:center;position:relative;z-index:1;
+  background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);
+  border-radius:16px;padding:14px 20px;
+}
+.ibs-num{font-family:'Recoleta',serif;font-size:36px;font-weight:700;color:var(--terra2);line-height:1}
+.ibs-label{font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px}
+
+/* ── Calculator card ── */
+.calc-card{
+  background:var(--white);border:1.5px solid var(--sand);border-radius:22px;
+  padding:26px 28px;margin-bottom:22px;
+  box-shadow:0 2px 14px rgba(44,31,20,0.05);
+}
+.cc-title{font-family:'Recoleta',serif;font-size:22px;font-weight:700;color:var(--bark);margin-bottom:5px;letter-spacing:-0.4px}
+.cc-title em{color:var(--terra);font-style:italic}
+.cc-sub{font-size:14px;color:var(--bark3);margin-bottom:22px;line-height:1.6}
+
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+@media(max-width:540px){.calc-grid{grid-template-columns:1fr}}
+
+.field{display:flex;flex-direction:column;gap:5px}
+label{font-size:10px;font-weight:700;color:var(--bark3);text-transform:uppercase;letter-spacing:0.09em}
+input,select{
+  font-family:'Nunito',sans-serif;font-size:14px;color:var(--bark);
+  background:var(--linen);border:1.5px solid var(--sand);
+  border-radius:10px;padding:10px 13px;width:100%;outline:none;
+  transition:border-color 0.2s;appearance:none;
+}
+input[type=number]{font-family:var(--mono);font-size:16px;font-weight:500}
+input::placeholder{color:var(--bark4)}
+input:focus,select:focus{border-color:var(--terra);box-shadow:0 0 0 2px rgba(196,98,45,0.1);background:var(--white)}
+
+.calc-btn{
+  width:100%;padding:14px;border-radius:12px;border:none;
+  background:var(--terra);color:white;
+  font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;
+  cursor:pointer;transition:all 0.18s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.calc-btn:hover{background:var(--terra2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(196,98,45,0.25)}
+.calc-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* ── Live calculator (always visible) ── */
+.live-calc{
+  background:var(--white);border:1.5px solid var(--sand);border-radius:20px;
+  overflow:hidden;margin-bottom:22px;
+}
+.lc-header{
+  background:var(--linen);border-bottom:1px solid var(--sand);
+  padding:14px 20px;display:flex;align-items:center;justify-content:space-between;
+}
+.lc-title{font-family:'Recoleta',serif;font-size:16px;font-weight:700;color:var(--bark)}
+.lc-desc{font-size:12px;color:var(--bark4)}
+
+.lc-inputs{padding:18px 20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;border-bottom:1px solid var(--sand)}
+@media(max-width:520px){.lc-inputs{grid-template-columns:1fr 1fr}}
+
+.lc-result{padding:20px}
+.lc-comparison{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;margin-bottom:16px}
+.lcc-cell{padding:14px 16px;border-right:1px solid var(--sand)}
+.lcc-cell:last-child{border-right:none}
+.lcc-label{font-size:10px;font-weight:700;color:var(--bark4);text-transform:uppercase;letter-spacing:0.09em;margin-bottom:6px}
+.lcc-val{font-family:var(--mono);font-size:22px;font-weight:500;color:var(--bark)}
+.lcc-val.penalty{color:var(--red2)}
+.lcc-val.saving{color:var(--moss2)}
+.lcc-sub{font-size:11px;color:var(--bark4);margin-top:3px}
+
+/* penalty bar */
+.penalty-bar{background:var(--linen);border-radius:12px;padding:14px 18px;margin-bottom:14px}
+.pb-label{font-size:12px;font-weight:700;color:var(--bark3);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.pb-pct{font-family:var(--mono);font-size:14px;font-weight:500;color:var(--red2)}
+.pb-track{height:12px;background:var(--sand2);border-radius:6px;overflow:hidden;position:relative}
+.pb-fill{height:100%;border-radius:6px;transition:width 0.6s cubic-bezier(0.4,0,0.2,1);background:var(--red2)}
+.pb-target{position:absolute;top:-2px;width:2px;height:16px;background:var(--moss2);border-radius:1px}
+.pb-legend{display:flex;justify-content:space-between;font-size:10px;color:var(--bark4);margin-top:5px}
+
+.verdict-pill{
+  width:100%;padding:12px 18px;border-radius:12px;text-align:center;
+  font-size:14px;font-weight:800;
+}
+.vp-good{background:var(--moss4);color:var(--moss2);border:1.5px solid var(--moss3)}
+.vp-warn{background:var(--gold4);color:var(--gold2);border:1.5px solid var(--gold3)}
+.vp-bad{background:var(--red4);color:var(--red2);border:1.5px solid var(--red3)}
+
+/* ── AI analysis ── */
+#aiSection{display:none}
+#aiSection.show{display:block;animation:fadeUp 0.35s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.loading-wrap{display:none;text-align:center;padding:40px 20px}
+.loading-wrap.show{display:block}
+.coin-spin{font-size:38px;display:block;margin:0 auto 16px;animation:coinSpin 1s ease-in-out infinite}
+@keyframes coinSpin{0%,100%{transform:rotateY(0deg)}50%{transform:rotateY(180deg)}}
+.ld-title{font-family:'Recoleta',serif;font-size:18px;font-style:italic;color:var(--bark2)}
+.ld-sub{font-size:13px;color:var(--bark4);margin-top:5px}
+
+/* ── Industry rates section ── */
+.industry-section{
+  background:var(--white);border:1.5px solid var(--sand);border-radius:20px;
+  overflow:hidden;margin-bottom:20px;animation:fadeUp 0.4s ease both;
+}
+.is-header{padding:16px 20px;background:var(--linen);border-bottom:1px solid var(--sand)}
+.is-title{font-family:'Recoleta',serif;font-size:18px;font-weight:700;color:var(--bark)}
+.is-sub{font-size:12px;color:var(--bark4);margin-top:2px}
+.industry-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0}
+.ig-cell{
+  padding:16px 18px;border-right:1px solid var(--sand2);border-bottom:1px solid var(--sand2);
+  transition:background 0.14s;cursor:default;
+}
+.ig-cell:hover{background:var(--linen)}
+.igc-icon{font-size:22px;margin-bottom:8px;display:block}
+.igc-type{font-size:13px;font-weight:800;color:var(--bark);margin-bottom:4px}
+.igc-range{font-family:var(--mono);font-size:14px;font-weight:500;margin-bottom:3px}
+.igc-range.bad{color:var(--red2)}.igc-range.warn{color:var(--gold2)}.igc-range.ok{color:var(--moss2)}
+.igc-note{font-size:11px;color:var(--bark4);line-height:1.5}
+
+/* ── No-supplement options ── */
+.no-supp-section{
+  background:var(--moss4);border:1.5px solid var(--moss3);
+  border-radius:18px;padding:20px 22px;margin-bottom:20px;
+  animation:fadeUp 0.4s ease 0.06s both;
+}
+.ns-title{font-family:'Recoleta',serif;font-size:18px;font-weight:700;color:var(--moss);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.ns-sub{font-size:13px;color:var(--bark3);margin-bottom:16px;line-height:1.6}
+.ns-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.ns-card{
+  background:var(--white);border-radius:12px;padding:14px 16px;
+  border:1.5px solid var(--moss3);transition:all 0.15s;cursor:pointer;
+}
+.ns-card:hover{border-color:var(--moss2);transform:translateY(-1px)}
+.nsc-icon{font-size:22px;margin-bottom:8px;display:block}
+.nsc-title{font-size:14px;font-weight:800;color:var(--bark);margin-bottom:4px}
+.nsc-badge{font-size:11px;font-weight:700;padding:2px 9px;border-radius:100px;background:var(--moss4);color:var(--moss2);display:inline-block;margin-bottom:5px}
+.nsc-desc{font-size:12px;color:var(--bark3);line-height:1.55}
+
+/* ── Strategies section ── */
+.strats-section{margin-bottom:20px;animation:fadeUp 0.4s ease 0.09s both}
+.strats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:540px){.strats-grid{grid-template-columns:1fr}}
+.strat-card{
+  background:var(--white);border:1.5px solid var(--sand);border-radius:var(--r);padding:16px 18px;
+  border-left:3px solid var(--terra);transition:all 0.15s;
+}
+.strat-card:hover{box-shadow:0 5px 18px rgba(44,31,20,0.07)}
+.sc-icon{font-size:22px;margin-bottom:9px;display:block}
+.sc-title{font-size:14px;font-weight:800;color:var(--bark);margin-bottom:5px}
+.sc-desc{font-size:13px;color:var(--bark3);line-height:1.6;margin-bottom:8px}
+.sc-saving{
+  font-size:12px;font-weight:700;padding:3px 10px;border-radius:100px;
+  background:var(--moss4);color:var(--moss2);display:inline-block;
+}
+
+/* ── Best solo-rate destinations ── */
+.destinations-section{
+  background:var(--white);border:1.5px solid var(--sand);border-radius:18px;padding:20px 22px;
+  margin-bottom:20px;animation:fadeUp 0.4s ease 0.12s both;
+}
+.ds-title{font-family:'Recoleta',serif;font-size:18px;font-weight:700;color:var(--bark);margin-bottom:6px}
+.ds-sub{font-size:13px;color:var(--bark4);margin-bottom:16px;line-height:1.6}
+.dest-list{display:flex;flex-direction:column;gap:8px}
+.dest-row{
+  display:flex;align-items:center;gap:12px;padding:11px 14px;
+  background:var(--linen);border-radius:11px;border:1.5px solid var(--sand);
+  transition:all 0.14s;
+}
+.dest-row:hover{border-color:var(--terra3);background:var(--terra4)}
+.dr-flag{font-size:20px;flex-shrink:0}
+.dr-dest{font-size:14px;font-weight:800;color:var(--bark);flex:1}
+.dr-reason{font-size:12px;color:var(--bark3);flex:2}
+.dr-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;flex-shrink:0}
+.drb-great{background:var(--moss4);color:var(--moss2)}
+.drb-good{background:var(--gold4);color:var(--gold2)}
+
+/* ── Sec hdr ── */
+.sec-hdr{font-size:11px;font-weight:700;color:var(--bark4);text-transform:uppercase;letter-spacing:0.09em;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.sec-hdr::after{content:'';flex:1;height:1px;background:var(--sand)}
+
+/* Bottom nav */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);background:var(--white);border-top:1px solid var(--sand);display:flex;justify-content:space-around;align-items:center;padding:0 8px;z-index:100}
+.bn-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 10px;border-radius:12px;cursor:pointer;flex:1;max-width:72px}
+.bn-icon{font-size:20px;opacity:0.4}
+.bn-label{font-size:10px;color:var(--bark4);font-weight:600}
+.bn-item.active .bn-icon{opacity:1}
+.bn-item.active .bn-label{color:var(--terra);font-weight:700}
+
+.err-bar{font-size:13px;color:var(--terra);background:var(--terra4);border:1px solid var(--terra3);border-radius:9px;padding:10px 14px;margin-top:10px;display:none}
+.err-bar.show{display:block}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="brand">
+      <div class="brand-mark">🧳</div>
+      <div class="brand-name">Solo<span>Wandr</span></div>
+    </div>
+    <div class="page-tag">💸 Single Supplement Calc</div>
+  </header>
+
+  <!-- ── Injustice banner ── -->
+  <div class="injustice-banner">
+    <div class="ib-inner">
+      <div class="ib-eyebrow">The solo travel tax</div>
+      <div class="ib-title">Solo travelers pay <em>up to 100% more</em><br>for the same room</div>
+      <div class="ib-sub">Hotels, cruises, and tours charge solo travelers a "single supplement" — an extra fee just for not having a roommate. This calculator shows you the real cost and how to fight it.</div>
+    </div>
+    <div class="ib-stat">
+      <div class="ibs-num">+68%</div>
+      <div class="ibs-label">avg solo premium<br>on package tours</div>
+    </div>
+  </div>
+
+  <!-- ── Live calculator (always on) ── -->
+  <div class="live-calc">
+    <div class="lc-header">
+      <div>
+        <div class="lc-title">💡 Quick Supplement Calculator</div>
+        <div class="lc-desc">Enter any quoted price to see your real solo cost instantly</div>
+      </div>
+    </div>
+    <div class="lc-inputs">
+      <div class="field">
+        <label>Per-person price (based on 2)</label>
+        <input type="number" id="lcBase" placeholder="500" oninput="liveCalc()" />
+      </div>
+      <div class="field">
+        <label>Single supplement %</label>
+        <input type="number" id="lcSupp" placeholder="50" oninput="liveCalc()" />
+      </div>
+      <div class="field">
+        <label>Number of nights / days</label>
+        <input type="number" id="lcNights" placeholder="7" oninput="liveCalc()" />
+      </div>
+    </div>
+    <div class="lc-result" id="lcResult">
+      <div class="lc-comparison" id="lcComparison">
+        <div class="lcc-cell">
+          <div class="lcc-label">Couple pays (each)</div>
+          <div class="lcc-val" id="lc-pair">—</div>
+          <div class="lcc-sub" id="lc-pair-total">Enter prices above</div>
+        </div>
+        <div class="lcc-cell">
+          <div class="lcc-label">You pay solo</div>
+          <div class="lcc-val penalty" id="lc-solo">—</div>
+          <div class="lcc-sub" id="lc-solo-total">Your real cost</div>
+        </div>
+        <div class="lcc-cell">
+          <div class="lcc-label">You pay extra</div>
+          <div class="lcc-val penalty" id="lc-extra">—</div>
+          <div class="lcc-sub" id="lc-extra-pct">vs couple pricing</div>
+        </div>
+      </div>
+      <div class="penalty-bar" id="penaltyBar" style="display:none">
+        <div class="pb-label">
+          <span>Your supplement penalty</span>
+          <span class="pb-pct" id="pbPct">—</span>
+        </div>
+        <div class="pb-track">
+          <div class="pb-fill" id="pbFill" style="width:0%"></div>
+          <div class="pb-target" style="left:50%" title="Industry average (50%)"></div>
+        </div>
+        <div class="pb-legend"><span>0%</span><span>50% (avg)</span><span>100%+</span></div>
+      </div>
+      <div class="verdict-pill vp-warn" id="lcVerdict" style="display:none">Enter your prices to see your supplement verdict</div>
+    </div>
+  </div>
+
+  <!-- ── Deep analysis calculator ── -->
+  <div class="calc-card">
+    <div class="cc-title">Get your <em>full trip analysis</em></div>
+    <div class="cc-sub">Tell Claude about your trip and get a complete breakdown — what you're actually paying, where the biggest supplements are hidden, and exactly how to bring the cost down.</div>
+    <div class="calc-grid">
+      <div class="field">
+        <label>Destination</label>
+        <input type="text" id="destInput" placeholder="e.g. Mediterranean cruise, Japan tour…" />
+      </div>
+      <div class="field">
+        <label>Trip Type</label>
+        <select id="tripType">
+          <option value="cruise">🚢 Cruise</option>
+          <option value="package tour">🎟 Package Tour</option>
+          <option value="hotel stay" selected>🏨 Hotel Stay</option>
+          <option value="safari">🦁 Safari</option>
+          <option value="ski resort">⛷ Ski Resort</option>
+          <option value="all-inclusive resort">🏖 All-Inclusive Resort</option>
+          <option value="river cruise">🛶 River Cruise</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Duration</label>
+        <select id="duration">
+          <option value="3–4 nights">3–4 nights</option>
+          <option value="1 week" selected>1 week</option>
+          <option value="2 weeks">2 weeks</option>
+          <option value="3 weeks">3 weeks</option>
+          <option value="1 month+">1 month+</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Budget Tier</label>
+        <select id="budgetTier">
+          <option value="budget">Budget</option>
+          <option value="mid-range" selected>Mid-range</option>
+          <option value="luxury">Luxury</option>
+          <option value="ultra-luxury">Ultra-luxury</option>
+        </select>
+      </div>
+    </div>
+    <div class="err-bar" id="errBar"></div>
+    <button class="calc-btn" id="calcBtn" onclick="analyzeTrip()">💸 Calculate My Solo Premium</button>
+  </div>
+
+  <!-- AI section -->
+  <div id="aiSection">
+    <div class="loading-wrap" id="loadingWrap">
+      <span class="coin-spin">💰</span>
+      <div class="ld-title" id="ldTitle">Calculating your solo premium…</div>
+      <div class="ld-sub">Claude is working out what you're really paying</div>
+    </div>
+    <div id="aiResults"></div>
+  </div>
+
+  <!-- ── Always-visible industry rates ── -->
+  <div class="industry-section">
+    <div class="is-header">
+      <div class="is-title">Industry Supplement Rates by Category</div>
+      <div class="is-sub">What solo travelers typically pay extra — before you even start negotiating</div>
+    </div>
+    <div class="industry-grid">
+      <div class="ig-cell">
+        <span class="igc-icon">🚢</span>
+        <div class="igc-type">Cruises</div>
+        <div class="igc-range bad">50–100%</div>
+        <div class="igc-note">Worst offenders. Some lines now offer dedicated solo cabins</div>
+      </div>
+      <div class="ig-cell">
+        <span class="igc-icon">🎟</span>
+        <div class="igc-type">Package Tours</div>
+        <div class="igc-range bad">40–100%</div>
+        <div class="igc-note">Especially bad for group adventure tours with shared rooms</div>
+      </div>
+      <div class="ig-cell">
+        <span class="igc-icon">🏨</span>
+        <div class="igc-type">Hotels</div>
+        <div class="igc-range warn">0–30%</div>
+        <div class="igc-note">Much better — most charge a flat room rate regardless</div>
+      </div>
+      <div class="ig-cell">
+        <span class="igc-icon">🦁</span>
+        <div class="igc-type">Safaris</div>
+        <div class="igc-range bad">50–100%</div>
+        <div class="igc-note">Very high — shared vehicle costs are split among pairs</div>
+      </div>
+      <div class="ig-cell">
+        <span class="igc-icon">⛷</span>
+        <div class="igc-type">Ski Resorts</div>
+        <div class="igc-range warn">20–50%</div>
+        <div class="igc-note">Catered chalets are worst; hotels are usually flat rate</div>
+      </div>
+      <div class="ig-cell">
+        <span class="igc-icon">🏖</span>
+        <div class="igc-type">All-Inclusive</div>
+        <div class="igc-range warn">25–60%</div>
+        <div class="igc-note">Varies widely — some now offer solo-specific rates</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+  <div class="bn-item"><span class="bn-icon">🏠</span><span class="bn-label">Home</span></div>
+  <div class="bn-item"><span class="bn-icon">🌍</span><span class="bn-label">Explore</span></div>
+  <div class="bn-item active"><span class="bn-icon" style="opacity:1">💸</span><span class="bn-label" style="color:var(--terra)">Cost Calc</span></div>
+  <div class="bn-item"><span class="bn-icon">🛡</span><span class="bn-label">Safety</span></div>
+  <div class="bn-item"><span class="bn-icon">👤</span><span class="bn-label">Profile</span></div>
+</nav>
+
+<script>
+const LOAD_MSGS = [
+  'Calculating your solo premium…','Finding the hidden costs…',
+  'Looking for no-supplement options…','Building your strategy…','Almost done…'
+];
+let ldInt;
+
+// ── Live calculator ──
+function fmt(n) {
+  return '$' + Math.round(n).toLocaleString();
+}
+
+function liveCalc() {
+  const base   = parseFloat(document.getElementById('lcBase').value)   || 0;
+  const supp   = parseFloat(document.getElementById('lcSupp').value)   || 0;
+  const nights = parseFloat(document.getElementById('lcNights').value) || 1;
+
+  if (!base) {
+    ['lc-pair','lc-solo','lc-extra'].forEach(id => document.getElementById(id).textContent = '—');
+    document.getElementById('penaltyBar').style.display = 'none';
+    document.getElementById('lcVerdict').style.display = 'none';
+    return;
+  }
+
+  const pairTotal  = base * nights;
+  const soloTotal  = base * (1 + supp/100) * nights;
+  const extra      = soloTotal - pairTotal;
+  const extraPct   = Math.round((extra / pairTotal) * 100);
+
+  document.getElementById('lc-pair').textContent     = fmt(pairTotal);
+  document.getElementById('lc-pair-total').textContent = `${fmt(base)}/night × ${nights} nights`;
+  document.getElementById('lc-solo').textContent     = fmt(soloTotal);
+  document.getElementById('lc-solo-total').textContent = `${fmt(base * (1+supp/100))}/night × ${nights} nights`;
+  document.getElementById('lc-extra').textContent    = fmt(extra);
+  document.getElementById('lc-extra-pct').textContent = `+${extraPct}% more than a couple`;
+
+  // Penalty bar
+  const barPct = Math.min(100, supp);
+  document.getElementById('pbFill').style.width   = barPct + '%';
+  document.getElementById('pbPct').textContent    = `+${supp}%`;
+  document.getElementById('penaltyBar').style.display = 'block';
+  document.getElementById('pbFill').style.background = supp > 75 ? 'var(--red2)' : supp > 40 ? 'var(--gold2)' : 'var(--moss2)';
+
+  // Verdict
+  const vd = document.getElementById('lcVerdict');
+  vd.style.display = 'block';
+  if (supp === 0) {
+    vd.className = 'verdict-pill vp-good';
+    vd.textContent = '🎉 No supplement! This is solo-traveler friendly pricing.';
+  } else if (supp <= 25) {
+    vd.className = 'verdict-pill vp-good';
+    vd.textContent = `✓ Low supplement (${supp}%) — reasonable for a solo traveler. You pay ${fmt(extra)} extra over ${nights} nights.`;
+  } else if (supp <= 60) {
+    vd.className = 'verdict-pill vp-warn';
+    vd.textContent = `⚠ Significant supplement (${supp}%) — worth negotiating or finding alternatives. Total solo premium: ${fmt(extra)}.`;
+  } else {
+    vd.className = 'verdict-pill vp-bad';
+    vd.textContent = `🚫 Punishing supplement (${supp}%) — you're paying ${fmt(extra)} just for being solo. Consider alternatives below.`;
+  }
+}
+
+// ── Deep analysis ──
+async function analyzeTrip() {
+  const dest   = document.getElementById('destInput').value.trim();
+  const type   = document.getElementById('tripType').value;
+  const dur    = document.getElementById('duration').value;
+  const budget = document.getElementById('budgetTier').value;
+
+  document.getElementById('errBar').classList.remove('show');
+  if (!dest) {
+    document.getElementById('errBar').textContent = '⚠ Please enter a destination or trip type.';
+    document.getElementById('errBar').classList.add('show'); return;
+  }
+
+  document.getElementById('calcBtn').disabled = true;
+  document.getElementById('aiResults').innerHTML = '';
+  const aiSec = document.getElementById('aiSection');
+  aiSec.classList.add('show');
+
+  let li = 0;
+  document.getElementById('ldTitle').textContent = LOAD_MSGS[0];
+  ldInt = setInterval(()=>{li=(li+1)%LOAD_MSGS.length;document.getElementById('ldTitle').textContent=LOAD_MSGS[li];},1700);
+  document.getElementById('loadingWrap').classList.add('show');
+
+  const prompt = `You are a solo travel finance expert. Analyze the single supplement situation for a solo traveler planning: ${type} to/in ${dest}, ${dur}, ${budget} budget.
+
+Respond ONLY with valid JSON (no markdown):
+{
+  "tripSummary": "${dest} — ${type}",
+  "typicalSupplement": "50–75%",
+  "typicalExtraCost": "$400–700",
+  "rating": "High supplement risk",
+  "ratingKey": "bad",
+  "analysis": "3-4 sentences of specific analysis — what solo travelers actually pay for ${type} to ${dest} specifically, which operators charge the most/least, and the honest situation",
+  "costBreakdown": [
+    {"item": "Specific cost component (e.g. cabin, shared excursions)","coupleEach":"$X","soloRate":"$X","supplement":"+XX%","note":"Short note on this cost"},
+    {"item": "Second cost component","coupleEach":"$X","soloRate":"$X","supplement":"+XX%","note":"Note"}
+  ],
+  "noSupplementOptions": [
+    {"icon":"🏠","title":"Specific no-supplement option for ${dest}/${type}","badge":"No supplement","desc":"Specific alternative that avoids the fee entirely"},
+    {"icon":"🤝","title":"Another alternative","badge":"Low supplement","desc":"Another practical option"},
+    {"icon":"💡","title":"Third option","badge":"Solo-friendly","desc":"Third practical alternative"}
+  ],
+  "strategies": [
+    {"icon":"🗣","title":"Negotiation script","desc":"Exact approach and words to use when negotiating the supplement for ${type} — what to say, who to ask, when to ask","saving":"Saves 20–50%"},
+    {"icon":"📅","title":"Timing strategy","desc":"When to book to get the best solo rate for ${type} to ${dest} — last minute vs advance, seasonal angles","saving":"Saves 10–30%"},
+    {"icon":"🔍","title":"Operator hunting","desc":"Which specific types of operators or platforms offer reduced or waived supplements for ${type}","saving":"Saves 30–100%"},
+    {"icon":"🤲","title":"Share & split strategy","desc":"How to find a roommate or cabin-sharer legitimately for ${type} — platforms, groups, timing","saving":"Saves 50–100%"},
+    {"icon":"📦","title":"Alternative booking structure","desc":"A completely different way to book ${type} that sidesteps the supplement problem entirely","saving":"Saves 40–100%"},
+    {"icon":"💳","title":"Loyalty & membership angle","desc":"Any memberships, credit card perks, or loyalty programs that waive supplements for ${type}","saving":"Varies"}
+  ],
+  "bestDestinations": [
+    {"flag":"🇯🇵","dest":"Japan","reason":"Solo travel infrastructure is excellent — hotels price by room, hostels abundant, no supplement culture","badge":"No supplement","badgeKey":"great"},
+    {"flag":"🇵🇹","dest":"Portugal","reason":"Highly solo-friendly hotel pricing, no package tour culture, excellent solo traveler community","badge":"Minimal","badgeKey":"great"},
+    {"flag":"🇹🇭","dest":"Thailand","reason":"Budget accommodation abundant, no supplement on most stays, strong backpacker infrastructure","badge":"No supplement","badgeKey":"great"},
+    {"flag":"🇳🇿","dest":"New Zealand","reason":"Adventure tour operators have adapted to solo market, many offer solo pricing","badge":"Low supplement","badgeKey":"good"},
+    {"flag":"🇪🇸","dest":"Spain","reason":"Hotels charge flat room rates, city hotels especially solo-friendly","badge":"Minimal","badgeKey":"great"}
+  ]
+}
+
+Make ALL advice specific to ${type} and ${dest}. Cost figures should be realistic estimates. ratingKey: "good" (0–25% supplement), "warn" (26–60%), "bad" (61%+).`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514', max_tokens:1000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data = await res.json();
+    const text = data.content.map(b=>b.text||'').join('');
+    const clean = text.replace(/```json|```/g,'').trim();
+    const result = JSON.parse(clean);
+
+    clearInterval(ldInt);
+    document.getElementById('loadingWrap').classList.remove('show');
+    document.getElementById('calcBtn').disabled = false;
+    renderAI(result);
+
+  } catch(err) {
+    clearInterval(ldInt);
+    document.getElementById('loadingWrap').classList.remove('show');
+    document.getElementById('calcBtn').disabled = false;
+    document.getElementById('errBar').textContent = '⚠ Could not calculate. Please try again.';
+    document.getElementById('errBar').classList.add('show');
+    console.error(err);
+  }
+}
+
+const RATING_PILL = {
+  good:'background:var(--moss4);color:var(--moss2);border:1.5px solid var(--moss3)',
+  warn:'background:var(--gold4);color:var(--gold2);border:1.5px solid var(--gold3)',
+  bad:'background:var(--red4);color:var(--red2);border:1.5px solid var(--red3)',
+};
+
+function renderAI(d) {
+  // Cost breakdown table
+  const cbRows = (d.costBreakdown||[]).map(r=>`
+    <tr style="border-bottom:1px solid var(--sand2)">
+      <td style="padding:10px 14px;font-size:13px;font-weight:700;color:var(--bark)">${r.item}</td>
+      <td style="padding:10px 14px;font-family:var(--mono);font-size:13px;color:var(--moss2);text-align:center">${r.coupleEach}</td>
+      <td style="padding:10px 14px;font-family:var(--mono);font-size:13px;color:var(--red2);font-weight:500;text-align:center">${r.soloRate}</td>
+      <td style="padding:10px 14px;font-family:var(--mono);font-size:13px;color:var(--red2);text-align:center">${r.supplement}</td>
+      <td style="padding:10px 14px;font-size:12px;color:var(--bark4)">${r.note||''}</td>
+    </tr>`).join('');
+
+  // No-supplement options
+  const nsHtml = (d.noSupplementOptions||[]).map(n=>`
+    <div class="ns-card">
+      <span class="nsc-icon">${n.icon||'💡'}</span>
+      <div class="nsc-title">${n.title}</div>
+      <span class="nsc-badge">${n.badge||'Solo-friendly'}</span>
+      <div class="nsc-desc">${n.desc}</div>
+    </div>`).join('');
+
+  // Strategies
+  const stratHtml = (d.strategies||[]).map(s=>`
+    <div class="strat-card">
+      <span class="sc-icon">${s.icon||'💡'}</span>
+      <div class="sc-title">${s.title}</div>
+      <div class="sc-desc">${s.desc}</div>
+      <span class="sc-saving">${s.saving}</span>
+    </div>`).join('');
+
+  // Best destinations
+  const destHtml = (d.bestDestinations||[]).map(bd=>`
+    <div class="dest-row">
+      <span class="dr-flag">${bd.flag}</span>
+      <div class="dr-dest">${bd.dest}</div>
+      <div class="dr-reason">${bd.reason}</div>
+      <span class="dr-badge ${bd.badgeKey==='great'?'drb-great':'drb-good'}">${bd.badge}</span>
+    </div>`).join('');
+
+  document.getElementById('aiResults').innerHTML = `
+    <div style="background:var(--white);border:1.5px solid var(--sand);border-radius:20px;overflow:hidden;margin-bottom:20px;animation:fadeUp 0.35s ease both">
+      <div style="padding:18px 22px;background:var(--linen);border-bottom:1px solid var(--sand);display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap">
+        <div>
+          <div style="font-family:'Recoleta',serif;font-size:19px;font-weight:700;color:var(--bark);margin-bottom:3px">${d.tripSummary}</div>
+          <div style="font-size:13px;color:var(--bark4)">Solo supplement analysis</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--red2)">${d.typicalSupplement}</div>
+          <div style="font-size:11px;color:var(--bark4);margin-bottom:6px">typical supplement</div>
+          <div style="padding:5px 14px;border-radius:100px;font-size:12px;font-weight:700;${RATING_PILL[d.ratingKey]||RATING_PILL.warn}">${d.rating}</div>
+        </div>
+      </div>
+      <div style="padding:18px 22px;border-bottom:1px solid var(--sand2)">
+        <div style="font-size:14px;color:var(--bark2);line-height:1.75">${d.analysis}</div>
+      </div>
+      ${cbRows ? `
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse">
+          <thead>
+            <tr style="background:var(--linen);border-bottom:1px solid var(--sand)">
+              <th style="padding:9px 14px;font-size:10px;font-weight:700;color:var(--bark4);text-align:left;text-transform:uppercase;letter-spacing:0.08em">Cost Component</th>
+              <th style="padding:9px 14px;font-size:10px;font-weight:700;color:var(--moss2);text-align:center;text-transform:uppercase;letter-spacing:0.08em">Couple Each</th>
+              <th style="padding:9px 14px;font-size:10px;font-weight:700;color:var(--red2);text-align:center;text-transform:uppercase;letter-spacing:0.08em">Solo Rate</th>
+              <th style="padding:9px 14px;font-size:10px;font-weight:700;color:var(--red2);text-align:center;text-transform:uppercase;letter-spacing:0.08em">Premium</th>
+              <th style="padding:9px 14px;font-size:10px;font-weight:700;color:var(--bark4);text-align:left;text-transform:uppercase;letter-spacing:0.08em">Note</th>
+            </tr>
+          </thead>
+          <tbody>${cbRows}</tbody>
+        </table>
+      </div>` : ''}
+    </div>
+
+    <div class="no-supp-section">
+      <div class="ns-title">🌿 No-Supplement Alternatives</div>
+      <div class="ns-sub">These options let you do the same type of trip without the solo penalty — or with dramatically reduced fees.</div>
+      <div class="ns-grid">${nsHtml}</div>
+    </div>
+
+    <div class="strats-section">
+      <div class="sec-hdr">Beat the Supplement — 6 Strategies</div>
+      <div class="strats-grid">${stratHtml}</div>
+    </div>
+
+    <div class="destinations-section">
+      <div class="ds-title">Best Destinations for Solo-Friendly Pricing</div>
+      <div class="ds-sub">These destinations have the lowest supplement culture — hotels and tours price fairly for solo travelers.</div>
+      <div class="dest-list">${destHtml}</div>
+    </div>
+
+    <div style="text-align:center;margin-top:10px">
+      <span style="font-size:13px;color:var(--bark4);cursor:pointer;text-decoration:underline" onclick="document.getElementById('aiResults').innerHTML='';document.getElementById('aiSection').classList.remove('show')">← Calculate a different trip</span>
+    </div>
+  `;
+}
+</script>
+</body>
+</html>

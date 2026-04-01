@@ -1,0 +1,68 @@
+{
+  "name": "WiseWandr",
+  "short_name": "WiseWandr",
+  "description": "The travel app for the 50+ solo traveler. Travel Solo and Know.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FBF8F2",
+  "theme_color": "#C4622D",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/solowandr-final-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Destination Finder",
+      "short_name": "Explore",
+      "url": "/?screen=destination-finder"
+    },
+    {
+      "name": "Safety Check-in",
+      "short_name": "Safety",
+      "url": "/?screen=safety-checkin"
+    },
+    {
+      "name": "Trip Journal",
+      "short_name": "Journal",
+      "url": "/?screen=ai-journal"
+    }
+  ]
+}
+```
+
+**Step 3** — Click **File** in the top menu. Click **Save As**.
+
+**Step 4** — This is the important part. At the bottom of the Save As window find the dropdown that says **Save as type**. Click it and change it from **Text Documents (\*.txt)** to **All Files (\*.\*)**.
+
+**Step 5** — In the **File name** field at the top delete whatever is there and type exactly:
+```
+manifest.json
+```
+
+**Step 6** — Navigate to your `wisewandr` folder on the Desktop. Make sure you are saving it there.
+
+**Step 7** — Click **Save**.
+
+---
+
+## Confirm It Saved Correctly
+
+Go to your `wisewandr` folder on the Desktop. You should see a file called `manifest.json`. 
+
+If you see `manifest.json.txt` it saved with the wrong extension. Go back to Notepad and repeat Step 4 — make sure you changed Save as type to **All Files** before saving.
+
+If you see `manifest.json` with no `.txt` at the end you did it perfectly. ✅
+
+---
+
+Now you have all four main files ready:
+```
+✅ index.html
+✅ solowandr-home.html
+✅ solowandr-final-logo.svg
+✅ manifest.json

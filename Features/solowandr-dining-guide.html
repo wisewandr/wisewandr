@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SoloWandr — Solo Dining Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Recoleta:wght@400;500;700&family=Nunito:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --terra:#C4622D;--terra2:#D4794A;--terra3:#F2D0BF;--terra4:#FDF3EE;
+  --sand:#E8D5B8;--sand2:#F5ECD8;--sand3:#FAF6EE;--linen:#FBF8F2;
+  --bark:#2C1F14;--bark2:#4A3728;--bark3:#7A6050;--bark4:#B0A090;
+  --moss:#2A5028;--moss2:#3A7038;--moss3:#C0DCC0;--moss4:#EEF7EE;
+  --gold:#8A6018;--gold2:#B88828;--gold3:#F8E4A8;--gold4:#FFFAEE;
+  --rose:#8A1840;--rose2:#B83060;--rose3:#F4C0D0;--rose4:#FDF0F5;
+  --teal:#0A5858;--teal2:#189090;--teal3:#C0E0E0;--teal4:#EAF6F6;
+  --white:#FFFFFF;--r:14px;--nav-h:64px;
+
+  /* food palette */
+  --ramen:#8A4018;--ramen2:#C06028;--ramen3:#F8D8C0;--ramen4:#FEF5EF;
+  --sushi:#1A5848;--sushi2:#289070;--sushi3:#B8E0D0;--sushi4:#EDF7F3;
+  --bistro:#483060;--bistro2:#6A48A0;--bistro3:#D8C8F0;--bistro4:#F5F0FF;
+}
+
+body{
+  font-family:'Nunito',sans-serif;
+  background:var(--linen);color:var(--bark);
+  min-height:100vh;overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 60% 40% at 30% 5%,rgba(196,98,45,0.06) 0%,transparent 55%),
+    radial-gradient(ellipse 50% 50% at 80% 90%,rgba(184,136,40,0.04) 0%,transparent 55%);
+  pointer-events:none;z-index:0;
+}
+
+.app{position:relative;z-index:1;max-width:940px;margin:0 auto;padding:0 20px calc(var(--nav-h)+24px)}
+
+/* ── Header ── */
+header{padding:24px 0 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--sand);margin-bottom:24px}
+.brand{display:flex;align-items:center;gap:8px}
+.brand-mark{width:30px;height:30px;border-radius:8px;background:var(--terra);display:flex;align-items:center;justify-content:center;font-size:15px}
+.brand-name{font-family:'Recoleta',serif;font-size:17px;font-weight:700;color:var(--bark)}
+.brand-name span{color:var(--terra)}
+.page-tag{background:var(--ramen4);border:1px solid var(--ramen3);color:var(--ramen2);font-size:11px;font-weight:700;padding:4px 12px;border-radius:100px}
+
+/* ── Search card ── */
+.search-card{
+  background:var(--white);border:1.5px solid var(--sand);border-radius:22px;
+  padding:26px 28px;margin-bottom:22px;
+  box-shadow:0 2px 14px rgba(44,31,20,0.05);
+}
+.sc-title{font-family:'Recoleta',serif;font-size:24px;font-weight:700;color:var(--bark);margin-bottom:5px;letter-spacing:-0.5px}
+.sc-title em{color:var(--terra);font-style:italic}
+.sc-sub{font-size:14px;color:var(--bark3);margin-bottom:20px;line-height:1.6}
+
+.search-row{display:grid;grid-template-columns:1fr 160px 160px auto;gap:10px;align-items:end}
+@media(max-width:640px){.search-row{grid-template-columns:1fr 1fr}}
+@media(max-width:420px){.search-row{grid-template-columns:1fr}}
+
+.field{display:flex;flex-direction:column;gap:5px}
+label{font-size:10px;font-weight:700;color:var(--bark3);text-transform:uppercase;letter-spacing:0.09em}
+input,select{
+  font-family:'Nunito',sans-serif;font-size:14px;color:var(--bark);
+  background:var(--linen);border:1.5px solid var(--sand);
+  border-radius:10px;padding:10px 13px;width:100%;outline:none;
+  transition:border-color 0.2s;appearance:none;
+}
+input::placeholder{color:var(--bark4)}
+input:focus,select:focus{border-color:var(--terra);box-shadow:0 0 0 2px rgba(196,98,45,0.1);background:var(--white)}
+
+/* vibe chips */
+.vibe-chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}
+.vc{
+  padding:6px 15px;border-radius:100px;border:1.5px solid var(--sand);background:none;
+  font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;color:var(--bark2);
+  cursor:pointer;transition:all 0.13s;user-select:none;
+}
+.vc:hover{border-color:var(--terra);color:var(--terra)}
+.vc.active{background:var(--terra);border-color:var(--terra);color:white}
+
+.go-btn{
+  padding:10px 24px;border-radius:10px;border:none;
+  background:var(--terra);color:white;
+  font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;
+  cursor:pointer;white-space:nowrap;transition:all 0.16s;
+}
+.go-btn:hover{background:var(--terra2);transform:translateY(-1px)}
+.go-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+
+.err-bar{font-size:13px;color:var(--terra);background:var(--terra4);border:1px solid var(--terra3);border-radius:9px;padding:10px 14px;margin-top:10px;display:none}
+.err-bar.show{display:block}
+
+/* ── Loading ── */
+.loading-wrap{display:none;text-align:center;padding:60px 20px}
+.loading-wrap.show{display:block}
+.fork-spin{
+  font-size:40px;margin:0 auto 18px;display:block;
+  animation:forkSpin 1.4s ease-in-out infinite;
+  width:fit-content;
+}
+@keyframes forkSpin{0%,100%{transform:rotate(-15deg) scale(1)}50%{transform:rotate(15deg) scale(1.1)}}
+.ld-title{font-family:'Recoleta',serif;font-size:19px;font-style:italic;color:var(--bark2)}
+.ld-sub{font-size:13px;color:var(--bark4);margin-top:5px}
+
+/* ── Empty ── */
+.empty-state{text-align:center;padding:60px 20px}
+.es-icon{font-size:52px;margin-bottom:14px;opacity:0.18}
+.es-title{font-family:'Recoleta',serif;font-size:21px;font-style:italic;color:var(--bark2);margin-bottom:8px}
+.es-sub{font-size:13px;color:var(--bark4);max-width:360px;margin:0 auto;line-height:1.65}
+
+/* ── RESULTS ── */
+#results{display:none}
+#results.show{display:block;animation:fadeUp 0.35s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Solo dining hero ── */
+.dining-hero{
+  background:var(--bark);border-radius:22px;padding:24px 28px;
+  margin-bottom:20px;position:relative;overflow:hidden;
+  display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;
+}
+.dining-hero::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:rgba(196,98,45,0.1);pointer-events:none}
+.dh-inner{flex:1;position:relative;z-index:1}
+.dh-eyebrow{font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.1em;font-weight:700;margin-bottom:4px}
+.dh-city{font-family:'Recoleta',serif;font-size:28px;font-weight:700;color:white;margin-bottom:6px;line-height:1.1}
+.dh-verdict{font-size:13px;font-weight:700;padding:5px 14px;border-radius:100px;display:inline-block;margin-bottom:10px}
+.dv-great{background:rgba(60,200,100,0.2);color:#80F0A0}
+.dv-good{background:rgba(255,200,60,0.2);color:#FFE080}
+.dv-mixed{background:rgba(255,140,60,0.2);color:#FFC080}
+.dh-summary{font-size:14px;color:rgba(255,255,255,0.72);line-height:1.7;max-width:520px}
+
+.dh-score-wrap{flex-shrink:0;text-align:center;position:relative;z-index:1}
+.dh-score-ring{width:100px;height:100px;transform:rotate(-90deg)}
+.dsr-track{fill:none;stroke:rgba(255,255,255,0.1);stroke-width:9}
+.dsr-fill{fill:none;stroke-width:9;stroke-linecap:round;stroke-dasharray:270;stroke-dashoffset:270;transition:stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1) 0.3s}
+.dh-score-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.dsn-val{font-family:'Recoleta',serif;font-size:28px;font-weight:700;color:white;line-height:1}
+.dsn-lbl{font-size:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.06em;margin-top:1px}
+
+/* ── Quick stats ── */
+.stats-row{display:flex;gap:0;background:var(--white);border:1.5px solid var(--sand);border-radius:14px;overflow:hidden;margin-bottom:20px;flex-wrap:wrap}
+.sr-cell{flex:1;min-width:90px;padding:13px 15px;border-right:1px solid var(--sand2)}
+.sr-cell:last-child{border-right:none}
+.src-lbl{font-size:10px;font-weight:700;color:var(--bark4);text-transform:uppercase;letter-spacing:0.09em;margin-bottom:3px}
+.src-val{font-family:'Recoleta',serif;font-size:18px;font-weight:700;color:var(--bark)}
+.src-val.good{color:var(--moss2)}.src-val.warn{color:var(--gold2)}.src-val.terra{color:var(--terra)}
+
+/* ── Section heading ── */
+.sec-hdr{font-size:11px;font-weight:700;color:var(--bark4);text-transform:uppercase;letter-spacing:0.09em;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.sec-hdr::after{content:'';flex:1;height:1px;background:var(--sand)}
+
+/* ── Restaurant cards ── */
+.restaurants-grid{display:flex;flex-direction:column;gap:14px;margin-bottom:24px}
+
+.resto-card{
+  background:var(--white);border:1.5px solid var(--sand);border-radius:18px;
+  overflow:hidden;transition:all 0.2s;
+  animation:fadeUp 0.4s ease both;
+}
+.resto-card:hover{box-shadow:0 10px 28px rgba(44,31,20,0.09);border-color:var(--terra3)}
+
+/* solo-friendly score strip at top */
+.rc-score-strip{
+  height:5px;border-radius:18px 18px 0 0;
+  transition:width 0.5s ease;
+}
+.strip-great{background:var(--moss2)}.strip-good{background:var(--gold2)}.strip-mixed{background:var(--terra2)}
+
+.rc-header{padding:16px 20px 12px;display:flex;gap:14px;align-items:flex-start}
+.rc-cuisine-icon{
+  width:48px;height:48px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;
+}
+.rc-info{flex:1}
+.rc-name{font-size:16px;font-weight:800;color:var(--bark);margin-bottom:2px}
+.rc-meta{font-size:12px;color:var(--bark4);display:flex;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.rc-badges{display:flex;gap:5px;flex-wrap:wrap}
+.rc-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px}
+.badge-counter{background:var(--teal4);color:var(--teal2);border:1px solid var(--teal3)}
+.badge-welcoming{background:var(--moss4);color:var(--moss2);border:1px solid var(--moss3)}
+.badge-phone-ok{background:var(--sky4);color:#2A6898;border:1px solid #C0D8F0}
+.badge-book{background:var(--gold4);color:var(--gold2);border:1px solid var(--gold3)}
+.badge-quick{background:var(--ramen4);color:var(--ramen2);border:1px solid var(--ramen3)}
+.badge-quiet{background:var(--linen);color:var(--bark3);border:1px solid var(--sand)}
+
+.rc-score{text-align:right;flex-shrink:0}
+.rcs-num{font-family:'Recoleta',serif;font-size:24px;font-weight:700}
+.rcs-lbl{font-size:10px;color:var(--bark4);text-transform:uppercase;letter-spacing:0.07em;margin-top:1px}
+
+.rc-body{padding:0 20px 14px}
+.rc-why{font-size:14px;color:var(--bark2);line-height:1.7;margin-bottom:10px}
+.rc-dishes{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.rc-dish{
+  font-size:12px;font-weight:700;padding:5px 13px;border-radius:100px;
+  background:var(--linen);border:1.5px solid var(--sand);color:var(--bark2);
+  display:flex;align-items:center;gap:5px;
+}
+.rc-dish-icon{font-size:14px}
+
+.rc-tips{background:var(--linen);border-radius:11px;padding:12px 14px;margin-bottom:12px}
+.rct-lbl{font-size:10px;font-weight:700;color:var(--terra);text-transform:uppercase;letter-spacing:0.09em;margin-bottom:7px}
+.rct-items{display:flex;flex-direction:column;gap:5px}
+.rct-item{font-size:12px;color:var(--bark2);line-height:1.55;display:flex;gap:7px}
+.rct-arrow{color:var(--terra);font-weight:800;flex-shrink:0}
+
+.rc-footer{
+  padding:10px 20px 16px;border-top:1px solid var(--sand2);
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+}
+.rc-price{font-family:'Recoleta',serif;font-size:18px;font-weight:700;color:var(--bark3)}
+.rc-price-note{font-size:12px;color:var(--bark4)}
+.rc-spacer{flex:1}
+.rc-save-btn{
+  padding:9px 20px;border-radius:100px;border:1.5px solid var(--sand);background:none;
+  font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;color:var(--bark3);
+  cursor:pointer;transition:all 0.14s;display:flex;align-items:center;gap:6px;
+}
+.rc-save-btn:hover{border-color:var(--terra);color:var(--terra);background:var(--terra4)}
+.rc-save-btn.saved{background:var(--terra4);border-color:var(--terra3);color:var(--terra)}
+
+/* ── Etiquette section ── */
+.etiquette-section{
+  background:var(--white);border:1.5px solid var(--sand);border-radius:18px;
+  overflow:hidden;margin-bottom:22px;
+  animation:fadeUp 0.4s ease 0.1s both;
+}
+.et-header{padding:16px 20px;background:var(--linen);border-bottom:1px solid var(--sand)}
+.et-title{font-family:'Recoleta',serif;font-size:18px;font-weight:700;color:var(--bark)}
+.et-sub{font-size:13px;color:var(--bark4);margin-top:2px}
+.et-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+@media(max-width:540px){.et-grid{grid-template-columns:1fr}}
+.et-item{
+  padding:16px 20px;border-right:1px solid var(--sand2);border-bottom:1px solid var(--sand2);
+}
+.et-item:nth-child(even){border-right:none}
+.et-item:nth-last-child(-n+2){border-bottom:none}
+@media(max-width:540px){.et-item{border-right:none}}
+.et-icon{font-size:22px;margin-bottom:8px;display:block}
+.et-name{font-size:13px;font-weight:800;color:var(--bark);margin-bottom:4px}
+.et-rule{font-size:12px;color:var(--bark3);line-height:1.6}
+.et-ok{color:var(--moss2);font-weight:700}
+.et-notok{color:var(--rose2);font-weight:700}
+
+/* ── Meal type tabs ── */
+.meal-tabs{display:flex;gap:0;background:var(--white);border:1.5px solid var(--sand);border-radius:14px;padding:4px;margin-bottom:18px;overflow-x:auto}
+.mt-btn{
+  flex:1;padding:8px 14px;border-radius:10px;border:none;background:none;
+  font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;color:var(--bark3);
+  cursor:pointer;white-space:nowrap;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.mt-btn:hover{color:var(--bark)}
+.mt-btn.active{background:var(--terra);color:white}
+
+/* ── Types section ── */
+.types-section{margin-bottom:22px;animation:fadeUp 0.4s ease 0.12s both}
+.types-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.type-card{
+  background:var(--white);border:1.5px solid var(--sand);border-radius:14px;padding:16px;
+  transition:all 0.18s;cursor:pointer;
+}
+.type-card:hover{border-color:var(--terra3);transform:translateY(-2px);box-shadow:0 8px 22px rgba(44,31,20,0.07)}
+.tc-icon{font-size:28px;margin-bottom:10px;display:block}
+.tc-name{font-size:14px;font-weight:800;color:var(--bark);margin-bottom:4px}
+.tc-score{font-size:12px;font-weight:700;padding:3px 9px;border-radius:100px;display:inline-block;margin-bottom:6px}
+.tcs-great{background:var(--moss4);color:var(--moss2)}
+.tcs-good{background:var(--gold4);color:var(--gold2)}
+.tcs-mixed{background:var(--terra4);color:var(--terra)}
+.tc-desc{font-size:12px;color:var(--bark3);line-height:1.6}
+
+/* ── App tricks ── */
+.tricks-list{display:flex;flex-direction:column;gap:8px;margin-bottom:22px;animation:fadeUp 0.4s ease 0.14s both}
+.trick-item{
+  display:flex;gap:12px;align-items:flex-start;
+  background:var(--white);border:1.5px solid var(--sand);border-radius:12px;
+  padding:14px 16px;font-size:13px;color:var(--bark2);line-height:1.65;
+  border-left:3px solid var(--terra);transition:border-color 0.15s;
+}
+.trick-item:hover{border-left-color:var(--terra2)}
+.trick-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.trick-content{}
+.trick-title{font-size:13px;font-weight:800;color:var(--bark);margin-bottom:3px}
+
+.reset-link{font-size:13px;color:var(--bark4);cursor:pointer;text-decoration:underline;display:block;text-align:center;margin-top:8px;transition:color 0.15s}
+.reset-link:hover{color:var(--terra)}
+
+/* Bottom nav */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);background:var(--white);border-top:1px solid var(--sand);display:flex;justify-content:space-around;align-items:center;padding:0 8px;z-index:100}
+.bn-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 10px;border-radius:12px;cursor:pointer;flex:1;max-width:72px}
+.bn-icon{font-size:20px;opacity:0.4}
+.bn-label{font-size:10px;color:var(--bark4);font-weight:600}
+.bn-item.active .bn-icon{opacity:1}
+.bn-item.active .bn-label{color:var(--terra);font-weight:700}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="brand">
+      <div class="brand-mark">🧳</div>
+      <div class="brand-name">Solo<span>Wandr</span></div>
+    </div>
+    <div class="page-tag">🍜 Solo Dining Guide</div>
+  </header>
+
+  <!-- ── Search ── -->
+  <div class="search-card">
+    <div class="sc-title">Eat <em>solo, eat well</em></div>
+    <div class="sc-sub">Find restaurants that genuinely welcome solo diners — counter seating, no awkward looks, and food that's worth ordering for one. No more being seated by the bathroom.</div>
+
+    <div style="margin-bottom:14px">
+      <label style="display:block;margin-bottom:8px">What kind of dining experience are you after?</label>
+      <div class="vibe-chips" id="vibeChips">
+        <button class="vc active" data-v="counter or bar seating">🍺 Counter / Bar Seating</button>
+        <button class="vc active" data-v="local and authentic">🌶 Local & Authentic</button>
+        <button class="vc" data-v="fine dining solo">✨ Fine Dining Solo</button>
+        <button class="vc" data-v="quick and cheap">💰 Quick & Cheap</button>
+        <button class="vc" data-v="street food">🛺 Street Food</button>
+        <button class="vc" data-v="good for people watching">👁 People Watching</button>
+        <button class="vc" data-v="good wifi to work while eating">💻 Work While Eating</button>
+        <button class="vc" data-v="no booking needed">🚶 Walk-in Friendly</button>
+      </div>
+    </div>
+
+    <div class="search-row">
+      <div class="field">
+        <label>City or Destination</label>
+        <input type="text" id="destInput" placeholder="e.g. Tokyo, Marrakech, Barcelona…" />
+      </div>
+      <div class="field">
+        <label>Meal Type</label>
+        <select id="mealType">
+          <option value="any meal">Any meal</option>
+          <option value="breakfast and brunch">Breakfast / Brunch</option>
+          <option value="lunch">Lunch</option>
+          <option value="dinner">Dinner</option>
+          <option value="late night">Late Night</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Budget</label>
+        <select id="budget">
+          <option value="budget street food under $5">$ Under $5</option>
+          <option value="casual $5–$15" selected>$$ $5–$15</option>
+          <option value="mid-range $15–$40">$$$ $15–$40</option>
+          <option value="fine dining $40+">$$$$ $40+</option>
+        </select>
+      </div>
+      <button class="go-btn" id="goBtn" onclick="findDining()">Find →</button>
+    </div>
+    <div class="err-bar" id="errBar"></div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-wrap" id="loadingWrap">
+    <span class="fork-spin">🍴</span>
+    <div class="ld-title" id="ldTitle">Finding solo-friendly spots…</div>
+    <div class="ld-sub">Claude is looking for places that actually welcome solo diners</div>
+  </div>
+
+  <!-- Empty -->
+  <div class="empty-state" id="emptyState">
+    <div class="es-icon">🍽</div>
+    <div class="es-title">Table for one, please</div>
+    <div class="es-sub">Enter your destination and Claude finds restaurants where solo diners are genuinely welcomed — with counter seats, good solo dishes, and the cultural etiquette you need to know.</div>
+  </div>
+
+  <!-- Results -->
+  <div id="results"></div>
+
+</div>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+  <div class="bn-item"><span class="bn-icon">🏠</span><span class="bn-label">Home</span></div>
+  <div class="bn-item active"><span class="bn-icon" style="opacity:1">🍽</span><span class="bn-label" style="color:var(--terra)">Dining</span></div>
+  <div class="bn-item"><span class="bn-icon">🌍</span><span class="bn-label">Explore</span></div>
+  <div class="bn-item"><span class="bn-icon">🛡</span><span class="bn-label">Safety</span></div>
+  <div class="bn-item"><span class="bn-icon">👤</span><span class="bn-label">Profile</span></div>
+</nav>
+
+<script>
+let vibes = new Set(['counter or bar seating','local and authentic']);
+let savedRestaurants = new Set();
+const LOAD_MSGS = [
+  'Finding solo-friendly spots…','Checking counter seating options…',
+  'Reading the solo dining culture…','Looking for the best solo dishes…',
+  'Almost ready…'
+];
+let ldInt;
+
+document.querySelectorAll('.vc').forEach(btn => {
+  btn.addEventListener('click', () => {
+    btn.classList.toggle('active');
+    const v = btn.dataset.v;
+    if (vibes.has(v)) vibes.delete(v); else vibes.add(v);
+  });
+});
+
+async function findDining() {
+  const dest   = document.getElementById('destInput').value.trim();
+  const meal   = document.getElementById('mealType').value;
+  const budget = document.getElementById('budget').value;
+  const vibeList = [...vibes].join(', ') || 'local and authentic';
+
+  document.getElementById('errBar').classList.remove('show');
+  if (!dest) {
+    document.getElementById('errBar').textContent = '⚠ Please enter a city or destination.';
+    document.getElementById('errBar').classList.add('show'); return;
+  }
+
+  document.getElementById('goBtn').disabled = true;
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('results').classList.remove('show');
+
+  let li = 0;
+  document.getElementById('ldTitle').textContent = LOAD_MSGS[0];
+  ldInt = setInterval(() => { li=(li+1)%LOAD_MSGS.length; document.getElementById('ldTitle').textContent=LOAD_MSGS[li]; }, 1600);
+  document.getElementById('loadingWrap').classList.add('show');
+
+  const prompt = `You are a solo travel dining expert who knows exactly where solo travelers feel genuinely welcomed and well-fed. Create a comprehensive solo dining guide for "${dest}".
+
+Solo diner preferences: ${vibeList}
+Meal focus: ${meal}
+Budget: ${budget}
+
+Respond ONLY with valid JSON (no markdown):
+{
+  "city": "${dest}",
+  "soloScore": 8.5,
+  "verdictLabel": "Solo Diner's Paradise",
+  "verdictKey": "great",
+  "summary": "2-3 honest sentences about the solo dining culture specifically in ${dest} — is it awkward? welcoming? what's the norm?",
+  "stats": {
+    "counterSeatingScore": "Excellent",
+    "avgSoloCost": "$12",
+    "bookingNeeded": "Rarely",
+    "bestMealSolo": "Lunch"
+  },
+  "restaurants": [
+    {
+      "name": "Specific restaurant or type of venue name in ${dest}",
+      "cuisineIcon": "🍜",
+      "cuisineType": "Specific cuisine type",
+      "neighborhood": "Neighborhood name",
+      "priceRange": "$12–18",
+      "pricePerPerson": "~$15",
+      "soloScore": 9.5,
+      "soloScoreKey": "great",
+      "badges": ["counter seating","solo welcoming","walk-in ok"],
+      "whySoloFriendly": "2 sentences on exactly why this type of place is perfect for solo diners in ${dest} — what makes the experience work",
+      "bestDishesForOne": [
+        {"icon":"🍜","name":"Dish name that's ideal for solo ordering"},
+        {"icon":"🥢","name":"Another great solo dish"},
+        {"icon":"🍺","name":"Drink that pairs well solo"}
+      ],
+      "soloTips": [
+        "Specific actionable tip for a solo diner at this type of place in ${dest}",
+        "Another specific tip — timing, seating, ordering strategy"
+      ],
+      "rating": "4.8"
+    }
+  ],
+  "diningEtiquette": [
+    {"icon":"📱","name":"Phone at the table","rule":"Is using your phone at a table while eating solo acceptable in ${dest}? Be specific.","ok":true},
+    {"icon":"⏰","name":"Lingering after eating","rule":"Is it ok to sit and relax after you finish eating solo in ${dest}? Or is turning tables expected?","ok":true},
+    {"icon":"📖","name":"Reading at the table","rule":"Norm around reading a book or having a book at a table while dining solo in ${dest}","ok":true},
+    {"icon":"💬","name":"Chatting with staff","rule":"Is it normal and welcome to chat with servers or counter staff in ${dest}?","ok":true},
+    {"icon":"🪑","name":"Counter seating etiquette","rule":"How to behave at a counter or bar seat specifically in ${dest} — is it expected to order multiple rounds?","ok":true},
+    {"icon":"🧾","name":"Splitting the bill","rule":"Any specific note about bill etiquette for solo diners in ${dest} — service charge, tipping norm for one person"}
+  ],
+  "diningTypeScores": [
+    {"icon":"🍜","name":"Ramen & noodle bars","scoreKey":"great","scoreLabel":"Perfect for solo","desc":"Why this works or doesn't work for solo diners in ${dest}"},
+    {"icon":"🍱","name":"Set lunch menus","scoreKey":"great","scoreLabel":"Ideal","desc":"One sentence"},
+    {"icon":"🥘","name":"Market food stalls","scoreKey":"great","scoreLabel":"Excellent","desc":"One sentence"},
+    {"icon":"🍺","name":"Bar with food","scoreKey":"good","scoreLabel":"Good option","desc":"One sentence"},
+    {"icon":"🍽","name":"Sit-down restaurants","scoreKey":"good","scoreLabel":"Generally fine","desc":"One sentence"},
+    {"icon":"🥩","name":"Fine dining","scoreKey":"mixed","scoreLabel":"Can be awkward","desc":"One sentence on how solo fine dining works in ${dest}"}
+  ],
+  "soloTricks": [
+    {"icon":"⏰","title":"Best timing for solo diners","text":"Specific time of day or day of week when solo dining in ${dest} is most comfortable and welcoming"},
+    {"icon":"🗣","title":"Magic phrase to use","text":"A phrase or approach in local language (or body language) that helps solo diners get a good table or a warm reception in ${dest}"},
+    {"icon":"📍","title":"Best neighborhoods to eat solo","text":"Which specific neighborhood or area of ${dest} has the most solo-diner-friendly culture and best options"},
+    {"icon":"📱","title":"App to use for solo reservations","text":"Best booking app or strategy for getting a solo table in ${dest} — some places are easier to book solo online"},
+    {"icon":"🍳","title":"The solo diner's secret","text":"The single best insider insight for eating solo well in ${dest} — something that makes a real difference"}
+  ]
+}
+
+Generate 4 restaurant recommendations. Use real venue types or named restaurants where you know them for ${dest}. Make all advice specific to ${dest}'s actual dining culture — not generic tips.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514', max_tokens:1000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data = await res.json();
+    const text = data.content.map(b=>b.text||'').join('');
+    const clean = text.replace(/```json|```/g,'').trim();
+    const result = JSON.parse(clean);
+
+    clearInterval(ldInt);
+    document.getElementById('loadingWrap').classList.remove('show');
+    document.getElementById('goBtn').disabled = false;
+    renderResults(result);
+
+  } catch(err) {
+    clearInterval(ldInt);
+    document.getElementById('loadingWrap').classList.remove('show');
+    document.getElementById('goBtn').disabled = false;
+    document.getElementById('emptyState').style.display = 'block';
+    document.getElementById('errBar').textContent = '⚠ Could not load dining guide. Please try again.';
+    document.getElementById('errBar').classList.add('show');
+    console.error(err);
+  }
+}
+
+const SCORE_COLOR = {great:'#3A7038',good:'#B88828',mixed:'#C4622D'};
+const STRIP_CLS   = {great:'strip-great',good:'strip-good',mixed:'strip-mixed'};
+const TYPE_SCORE_CLS = {great:'tcs-great',good:'tcs-good',mixed:'tcs-mixed'};
+const VERDICT_CLS = {great:'dv-great',good:'dv-good',mixed:'dv-mixed'};
+const BADGE_CLS_MAP = {
+  'counter seating':'badge-counter','bar seating':'badge-counter',
+  'solo welcoming':'badge-welcoming','phone ok':'badge-phone-ok',
+  'walk-in ok':'badge-book','booking needed':'badge-book',
+  'quick service':'badge-quick','quiet':'badge-quiet'
+};
+
+function renderResults(d) {
+  const score = d.soloScore || 8.0;
+  const ringOffset = Math.round(270 - (score/10)*270);
+  const verdictCls = VERDICT_CLS[d.verdictKey] || VERDICT_CLS.good;
+
+  // Hero
+  const heroHtml = `
+    <div class="dining-hero">
+      <div class="dh-inner">
+        <div class="dh-eyebrow">🍽 Solo Dining Guide · ${d.city}</div>
+        <div class="dh-city">${d.city}</div>
+        <span class="dh-verdict ${verdictCls}">${d.verdictLabel||'Good for Solo Dining'}</span>
+        <div class="dh-summary">${d.summary||''}</div>
+      </div>
+      <div class="dh-score-wrap">
+        <svg class="dh-score-ring" viewBox="0 0 100 100">
+          <circle class="dsr-track" cx="50" cy="50" r="43"/>
+          <circle class="dsr-fill" cx="50" cy="50" r="43" id="dineRing" style="stroke:${SCORE_COLOR[d.verdictKey]||'#B88828'};stroke-dashoffset:270"/>
+        </svg>
+        <div class="dh-score-num">
+          <div class="dsn-val">${score.toFixed(1)}</div>
+          <div class="dsn-lbl">Solo Score</div>
+        </div>
+      </div>
+    </div>`;
+
+  // Stats
+  const s = d.stats||{};
+  const statsHtml = `
+    <div class="stats-row">
+      <div class="sr-cell"><div class="src-lbl">Counter Seating</div><div class="src-val good">${s.counterSeatingScore||'—'}</div></div>
+      <div class="sr-cell"><div class="src-lbl">Avg Solo Meal</div><div class="src-val terra">${s.avgSoloCost||'—'}</div></div>
+      <div class="sr-cell"><div class="src-lbl">Booking Needed</div><div class="src-val">${s.bookingNeeded||'—'}</div></div>
+      <div class="sr-cell"><div class="src-lbl">Best Meal Solo</div><div class="src-val">${s.bestMealSolo||'—'}</div></div>
+    </div>`;
+
+  // Restaurant cards
+  const restosHtml = (d.restaurants||[]).map((r,i)=>{
+    const sc = SCORE_COLOR[r.soloScoreKey]||SCORE_COLOR.good;
+    const strip = STRIP_CLS[r.soloScoreKey]||STRIP_CLS.good;
+    const badgesHtml = (r.badges||[]).map(b=>{
+      const cls = Object.entries(BADGE_CLS_MAP).find(([k])=>b.toLowerCase().includes(k))?.[1] || 'badge-quick';
+      return `<span class="rc-badge ${cls}">${b}</span>`;
+    }).join('');
+    const dishesHtml = (r.bestDishesForOne||[]).map(d=>`
+      <div class="rc-dish"><span class="rc-dish-icon">${d.icon||'🍽'}</span>${d.name}</div>`).join('');
+    const tipsHtml = (r.soloTips||[]).map(t=>`
+      <div class="rct-item"><span class="rct-arrow">→</span><span>${t}</span></div>`).join('');
+    return `
+    <div class="resto-card" style="animation-delay:${i*0.07}s">
+      <div class="rc-score-strip ${strip}"></div>
+      <div class="rc-header">
+        <div class="rc-cuisine-icon" style="background:var(--${r.soloScoreKey==='great'?'moss':'gold'}4)">${r.cuisineIcon||'🍽'}</div>
+        <div class="rc-info">
+          <div class="rc-name">${r.name}</div>
+          <div class="rc-meta">
+            <span>📍 ${r.neighborhood||d.city}</span>
+            <span>🍴 ${r.cuisineType}</span>
+          </div>
+          <div class="rc-badges">${badgesHtml}</div>
+        </div>
+        <div class="rc-score">
+          <div class="rcs-num" style="color:${sc}">${r.soloScore?.toFixed?.(r.soloScore):r.soloScore||'—'}</div>
+          <div class="rcs-lbl">Solo Score</div>
+          <div style="font-size:12px;color:var(--gold2);margin-top:3px">★ ${r.rating||'4.5'}</div>
+        </div>
+      </div>
+      <div class="rc-body">
+        <div class="rc-why">${r.whySoloFriendly||''}</div>
+        <div class="rc-dishes">${dishesHtml}</div>
+        ${tipsHtml ? `<div class="rc-tips"><div class="rct-lbl">Solo Diner Tips</div><div class="rct-items">${tipsHtml}</div></div>` : ''}
+      </div>
+      <div class="rc-footer">
+        <div>
+          <div class="rc-price">${r.priceRange||r.pricePerPerson||'—'}</div>
+          <div class="rc-price-note">per person</div>
+        </div>
+        <div class="rc-spacer"></div>
+        <button class="rc-save-btn ${savedRestaurants.has(r.name)?'saved':''}" id="save-${i}" onclick="saveResto('${r.name.replace(/'/g,'`')}',${i})">
+          ${savedRestaurants.has(r.name)?'♥ Saved':'♡ Save'}
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Etiquette
+  const etHtml = (d.diningEtiquette||[]).map(e=>`
+    <div class="et-item">
+      <span class="et-icon">${e.icon}</span>
+      <div class="et-name">${e.name}</div>
+      <div class="et-rule">
+        <span class="${e.ok?'et-ok':'et-notok'}">${e.ok?'✓ Generally fine:':'✗ Avoid:'}</span> ${e.rule}
+      </div>
+    </div>`).join('');
+
+  // Dining types
+  const typesHtml = (d.diningTypeScores||[]).map(t=>`
+    <div class="type-card">
+      <span class="tc-icon">${t.icon}</span>
+      <div class="tc-name">${t.name}</div>
+      <span class="tc-score ${TYPE_SCORE_CLS[t.scoreKey]||'tcs-good'}">${t.scoreLabel}</span>
+      <div class="tc-desc">${t.desc}</div>
+    </div>`).join('');
+
+  // Solo tricks
+  const tricksHtml = (d.soloTricks||[]).map(t=>`
+    <div class="trick-item">
+      <span class="trick-icon">${t.icon}</span>
+      <div class="trick-content">
+        <div class="trick-title">${t.title}</div>
+        <div>${t.text}</div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('results').innerHTML = `
+    ${heroHtml}
+    ${statsHtml}
+    <div class="sec-hdr">Solo-Friendly Restaurants</div>
+    <div class="restaurants-grid">${restosHtml}</div>
+    <div class="etiquette-section">
+      <div class="et-header">
+        <div class="et-title">Dining Etiquette for Solo Travelers</div>
+        <div class="et-sub">What's acceptable, expected, and what to avoid in ${d.city}</div>
+      </div>
+      <div class="et-grid">${etHtml}</div>
+    </div>
+    <div class="types-section">
+      <div class="sec-hdr">Best Dining Types for Solo Travel</div>
+      <div class="types-grid">${typesHtml}</div>
+    </div>
+    <div class="sec-hdr">Solo Diner's Playbook</div>
+    <div class="tricks-list">${tricksHtml}</div>
+    <span class="reset-link" onclick="resetForm()">← Find dining in another city</span>
+  `;
+
+  document.getElementById('results').classList.add('show');
+  setTimeout(()=>{ const r=document.getElementById('dineRing'); if(r) r.style.strokeDashoffset=ringOffset; },100);
+}
+
+function saveResto(name,i) {
+  const btn = document.getElementById(`save-${i}`);
+  if (savedRestaurants.has(name)) {
+    savedRestaurants.delete(name);
+    if(btn){btn.textContent='♡ Save';btn.classList.remove('saved')}
+  } else {
+    savedRestaurants.add(name);
+    if(btn){btn.textContent='♥ Saved';btn.classList.add('saved')}
+  }
+}
+
+function resetForm() {
+  document.getElementById('results').innerHTML='';
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('emptyState').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.getElementById('destInput').addEventListener('keydown',e=>{if(e.key==='Enter')findDining()});
+</script>
+</body>
+</html>
